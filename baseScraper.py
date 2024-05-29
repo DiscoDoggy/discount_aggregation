@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-import json
 import requests
 from constants import *
 import random
