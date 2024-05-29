@@ -1,5 +1,8 @@
 from baseScraper import *
 from constants import *
+import math
+from random import randint
+from time import sleep
 
 class UniqloScraper(BaseScrapper):
     def __init__(self):
@@ -20,9 +23,25 @@ class UniqloScraper(BaseScrapper):
         """
         for path_id in UNIQLO_API_PATH_PARAMS:
             api_params = self.assemble_api_params(path_id)
-            pass
+
+            first_res = self.session.get(self.urls_to_scrape[0], params=api_params)
+
+            pagination_dict = first_res.json()['result']['pagination']
+            total_discounted_items = pagination_dict['total']
+
+            num_calls_to_make = math.ceil(total_discounted_items / UNIQLO_API_PRODUCT_LIMIT_PARAM)
+
+            for i in range(num_calls_to_make):
+                sleep(randint(2,5))
+
+                api_offset = i * UNIQLO_API_PRODUCT_LIMIT_PARAM
+                api_params = self.assemble_api_params(path_id, offset=api_offset)
+                response = self.session.get(self.urls_to_scrape[0], params=api_params).json()
+
+                #figure out how i want to handle the json response
+
     
-    def handle_pagination(total, offset, count):
+    def handle_pagination(self, total:int, offset:int, count:int):
         pass
 
     def assemble_api_params(self, path_id, offset=0):
@@ -32,7 +51,7 @@ class UniqloScraper(BaseScrapper):
             "path" : concat_path_id,
             "flagCodes" : "discount",
             "offset" : offset,
-            "limit" : 100,
+            "limit" : UNIQLO_API_PRODUCT_LIMIT_PARAM,
             "httpFailure" : "true"
         }
 
@@ -45,4 +64,7 @@ class UniqloScraper(BaseScrapper):
         print(f'Headers: {self.session.headers}')
         print(f'response text type:{type(response.json())}')
         pagination_dict = response.json()['result']['pagination']
-        print(f"pagination: {pagination_dict}")
+        total = pagination_dict['total']
+        offset = pagination_dict['offset']
+        count = pagination_dict['count']
+        print(f"Total: {total}, Offset {offset}, Count {count}")
