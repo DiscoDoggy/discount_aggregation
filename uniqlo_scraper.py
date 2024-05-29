@@ -10,22 +10,39 @@ class UniqloScraper(BaseScrapper):
         self.session.headers = self.headers
 
     def scrape(self):
-
+        """
+        -For every path id, which represents Mens sales, Women sales, etc
+        assemble API parameters. 
+        -Uniqlo API only allows grabbing up to 100 items at a time. The API is paginated. This means within a path ID
+        we also need to loop through and make sure we extract all items within all pages. To know how many items there are total within
+        a single path ID, the extracted JSON provides total, offset, and count. Total is the total number of items across all pages, we can calculate
+        how many iterations we should do before stopping GET requests for a particular path id
+        """
         for path_id in UNIQLO_API_PATH_PARAMS:
-            #store all json responses in an array to prepare it for parsing
+            api_params = self.assemble_api_params(path_id)
             pass
     
-    def handle_pagination(self):
+    def handle_pagination(total, offset, count):
         pass
 
-    def assemble_api_params(self):
-        pass
+    def assemble_api_params(self, path_id, offset=0):
+        print(type(path_id))
+        concat_path_id = path_id + ",,,"
+        params = {
+            "path" : concat_path_id,
+            "flagCodes" : "discount",
+            "offset" : offset,
+            "limit" : 100,
+            "httpFailure" : "true"
+        }
+
+        return params
 
     def test_api_run(self):
-        response = self.session.get('https://www.uniqlo.com/us/api/commerce/v5/en/products?path=22210,,,&flagCodes=discount&offset=0&limit=36&httpFailure=true')
+        api_params = self.assemble_api_params("22210")
+        response = self.session.get(self.urls_to_scrape[0], params=api_params)
         print(f'Status Code: {response.status_code}')
         print(f'Headers: {self.session.headers}')
-        # print(f'Response: {response.text}')
-        print(response.json())
         print(f'response text type:{type(response.json())}')
-            
+        pagination_dict = response.json()['result']['pagination']
+        print(f"pagination: {pagination_dict}")
