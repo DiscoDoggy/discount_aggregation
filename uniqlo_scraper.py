@@ -39,10 +39,7 @@ class UniqloScraper(BaseScrapper):
                 response = self.session.get(self.urls_to_scrape[0], params=api_params).json()
 
                 #figure out how i want to handle the json response
-
-    
-    def handle_pagination(self, total:int, offset:int, count:int):
-        pass
+                
 
     def assemble_api_params(self, path_id, offset=0):
         print(type(path_id))

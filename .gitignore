@@ -2,5 +2,6 @@
 __pycache__
 clothing_sales_env
 constants.py
-
+notes.txt
+*.json
 
