@@ -17,11 +17,13 @@ class StoreDriver:
             if self.json_processor != None:
                 processed_json_list = self.json_processor.parse_json(json_item)
 
+                for obj in processed_json_list:
+                    self.test_write_to_file(obj)
+        
+
         #ingest the data or write it to a file or something for now.
         
         #detect if we are dealing with a batch or a singular item to push to the db
-        for obj in processed_json_list:
-            self.test_write_to_file(obj)
         
 
     def test_write_to_file(self, json_object):

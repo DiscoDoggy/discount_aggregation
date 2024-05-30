@@ -1,6 +1,4 @@
 from baseScraper import *
-from staging_uniqlo_item import *
-
 from constants import *
 import math
 from random import randint
@@ -24,12 +22,15 @@ class UniqloScraper(BaseScrapper):
         how many iterations we should do before stopping GET requests for a particular path id
         """
         for path_id in UNIQLO_API_PATH_PARAMS:
+            print(f"Path ID: {path_id}")
             api_params = self.assemble_api_params(path_id)
 
             first_res = self.session.get(self.urls_to_scrape[0], params=api_params)
 
             pagination_dict = first_res.json()['result']['pagination']
             total_discounted_items = pagination_dict['total']
+
+            print(total_discounted_items)
 
             num_calls_to_make = math.ceil(total_discounted_items / UNIQLO_API_PRODUCT_LIMIT_PARAM)
 
@@ -44,7 +45,6 @@ class UniqloScraper(BaseScrapper):
                 yield response
 
     def assemble_api_params(self, path_id, offset=0):
-        print(type(path_id))
         concat_path_id = path_id + ",,,"
         params = {
             "path" : concat_path_id,
