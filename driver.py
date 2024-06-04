@@ -1,27 +1,25 @@
-import requests
 from baseScraper import *
 from uniqlo_json_processor import *
 from uniqlo_scraper import *
+from staging_ingestor import *
 from constants import *
 import json
-import pandas as pd
+
+
 
 class StoreDriver:
-    def __init__(self, store_scraper:BaseScrapper, json_processor : JsonProcessor | None):
+    def __init__(self, store_scraper:BaseScrapper, json_processor : JsonProcessor | None, ingestion_object=None):
         self.store_scraper = store_scraper
         self.json_processor = json_processor
+        self.ingestor = ingestion_object
     
     def run(self):
-
-        json_item_list = []
         unprocessed_json_item_info = self.store_scraper.scrape()
+        json_items_list = self.collect_data_for_ingestion(unprocessed_json_item_info)
+        self.ingestor.ingest_data(json_items_list)
         
-        for json_item in unprocessed_json_item_info:
-            if self.json_processor != None:
-                processed_json_list = self.json_processor.parse_json(json_item)
 
-                for obj in processed_json_list:
-                    json_item_list.append(obj)
+
         
         
         #ingest the data or write it to a file or something for now.
@@ -37,10 +35,26 @@ class StoreDriver:
         
         file_obj.close()
 
+    def collect_data_for_ingestion(self, unprocessed_json_item_info):
+        json_item_list = []
+        unprocessed_json_item_info = self.store_scraper.scrape()
+        
+        for json_item in unprocessed_json_item_info:
+            if self.json_processor != None:
+                processed_json_list = self.json_processor.parse_json(json_item)
+
+                for obj in processed_json_list:
+                    # json_item_list.append(obj)
+                    self.test_write_to_file(obj)
+                    json_item_list.append(obj)
+
+        return json_item_list
+
 def main():
     scraping_object = UniqloScraper()
     parsing_object = UniqloJsonProcessor()
     driver_object = StoreDriver(scraping_object, parsing_object)
+
     #ingestion object, all items from the returned obojet
     driver_object.run()
 
