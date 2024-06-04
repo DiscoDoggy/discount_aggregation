@@ -14,7 +14,7 @@ class UniqloJsonProcessor(JsonProcessor):
             parsed_json_item = {}
             
             parsed_json_item['id_from_api'] = item['productId']
-            parsed_json_item['link_to_item'] = create_item_link(item)
+            parsed_json_item['link_to_item'] = self.create_item_link(item)
             parsed_json_item['item_name'] = item['name']
 
             parsed_json_item['base_price'] = item['prices']['base']['value']
@@ -62,10 +62,10 @@ class UniqloJsonProcessor(JsonProcessor):
         price group, color display code, and size display code will need to be found from the JSON item
         """
 
-        base_link = "https://www.uniqlo.com/us/en/products/"
+        base_link = "https://www.uniqlo.com/us/en/products"
         product_id = item_json['productId']
         price_group = item_json['priceGroup']
-        color_disp_code = item_json['representative']['displayCode']
+        color_disp_code = item_json['representative']['color']['displayCode']
         size_display_code = item_json['sizes'][0]['displayCode']
 
         url_to_product = f"{base_link}/{product_id}/{price_group}?colorDisplayCode={color_disp_code}&sizeDisplayCode={size_display_code}"
