@@ -1,7 +1,8 @@
 #gitignore file
 __pycache__
 clothing_sales_env
-constants.py
+*constants.py
 notes.txt
 *.json
+*.env
 

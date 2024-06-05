@@ -1,18 +1,21 @@
 from abc import ABC, abstractmethod
 import requests
-from constants import *
+from uniqlo_constants import *
 import random
 
 
 class BaseScrapper:
-    def __init__(self, urls_to_scrape):
+    def __init__(self, urls_to_scrape, site_id):
         self.urls_to_scrape = urls_to_scrape
+        self.site_id = site_id
         self.session = requests.Session()
 
 
     def get_random_user_agent(self):
         return random.choice(USER_AGENTS)
     
+    def get_site_id(self):
+        return self.site_id
 
     @abstractmethod
     def scrape(self):

@@ -8,9 +8,11 @@ class StagingIngestor:
         self.client = self.setup_client()
         
     def ingest_data(self, json_data):
-        self.client.inventory.insert_many(json_data)
+        collection_name = self.client['extraction_results']
+        collection_name.inventory.insert_many(json_data)
 
     def setup_client(self):
+
         load_dotenv()
         MONGO_USERNAME = os.getenv('MONGO_DB_USERNAME')
         MONGO_PASSWORD = os.getenv('MONGO_DB_PASSWORD')
@@ -23,6 +25,7 @@ class StagingIngestor:
             print("Pinged your deployment. You successfully connected to MongoDB!")
         except Exception as e:
             print(e)
+            
 
         return client
      

@@ -1,12 +1,12 @@
 from baseScraper import *
-from constants import *
+from uniqlo_constants import *
 import math
 from random import randint
 from time import sleep
 
 class UniqloScraper(BaseScrapper):
     def __init__(self):
-        super().__init__(UNIQLO_SALES_API_EP)
+        super().__init__(UNIQLO_SALES_API_EP, site_id=1)
         self.user_agent = super().get_random_user_agent()
         self.headers = UNIQLO_HEADER
         self.headers["User-Agent"] = self.user_agent
@@ -23,11 +23,9 @@ class UniqloScraper(BaseScrapper):
         """
         for path_id in UNIQLO_API_PATH_PARAMS:
             print(f"Path ID: {path_id}")
-            api_params = self.assemble_api_params(path_id)
+            first_res = self.make_request(path_id=path_id)
 
-            first_res = self.session.get(self.urls_to_scrape[0], params=api_params)
-
-            pagination_dict = first_res.json()['result']['pagination']
+            pagination_dict = first_res['result']['pagination']
             total_discounted_items = pagination_dict['total']
 
             print(total_discounted_items)
@@ -35,14 +33,36 @@ class UniqloScraper(BaseScrapper):
             num_calls_to_make = math.ceil(total_discounted_items / UNIQLO_API_PRODUCT_LIMIT_PARAM)
 
             for i in range(num_calls_to_make):
-                sleep(randint(2,5))
-
                 api_offset = i * UNIQLO_API_PRODUCT_LIMIT_PARAM
-                api_params = self.assemble_api_params(path_id, offset=api_offset)
-                response = self.session.get(self.urls_to_scrape[0], params=api_params).json()
+                response = self.make_request(path_id, api_offset)
 
-                #figure out how i want to handle the json response
                 yield response
+
+    def make_request(self, path_id, api_offset=0):
+        api_params = self.assemble_api_params(path_id, offset=api_offset)
+        for i in range(UNIQLO_NUM_RETRIES):
+            time_until_retry = i ** 2
+            sleep(time_until_retry)
+            try:
+                response = self.session.get(self.urls_to_scrape[0], params=api_params)
+                response_status_code = response.status_code
+                response = response.json()
+                print(response_status_code)
+                if response_status_code in [200, 404]:
+                    break
+            except requests.exceptions.Timeout as errt: #TODO: implement a retry functionality
+                print(errt)
+            except requests.exceptions.TooManyRedirects as e:
+                raise SystemExit(e)
+            except requests.exceptions.HTTPError as errh:
+                raise SystemExit(errh)
+            except requests.exceptions.RequestException as err:
+                SystemExit(err)
+
+        if response_status_code == 408:
+            SystemExit("System Exit -- Max retries attempted after timeout")
+
+        return response
 
     def assemble_api_params(self, path_id, offset=0):
         concat_path_id = path_id + ",,,"
