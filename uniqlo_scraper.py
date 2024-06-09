@@ -43,6 +43,8 @@ class UniqloScraper(BaseScrapper):
         for i in range(UNIQLO_NUM_RETRIES):
             time_until_retry = i ** 2
             sleep(time_until_retry)
+            if i == 0:
+                sleep(randint(2,7))
             try:
                 response = self.session.get(self.urls_to_scrape[0], params=api_params)
                 response_status_code = response.status_code
