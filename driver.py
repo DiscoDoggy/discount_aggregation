@@ -44,7 +44,7 @@ class StoreDriver:
                 processed_json_list = self.json_processor.parse_json(json_item)
 
                 for obj in processed_json_list:
-                    self.add_info_fields_to_json(obj)
+                    obj = self.add_info_fields_to_json(obj)
                     self.test_write_to_file(obj)
                     json_item_list.append(obj)
 

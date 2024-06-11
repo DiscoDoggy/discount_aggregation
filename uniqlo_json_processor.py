@@ -13,7 +13,7 @@ class UniqloJsonProcessor(JsonProcessor):
         for item in unparsed_json_items:
             parsed_json_item = {}
             
-            parsed_json_item['id_from_api'] = item['productId']
+            parsed_json_item['id_from_site'] = item['productId']
             parsed_json_item['link_to_item'] = self.create_item_link(item)
             parsed_json_item['item_name'] = item['name']
 
@@ -32,6 +32,8 @@ class UniqloJsonProcessor(JsonProcessor):
             parsed_json_item['sale_start_time'] = item['representative']['flags']['priceFlags'][0]['effectiveTime']['start']
 
             parsed_json_item['image_links'] = self.parse_images(item)
+
+            parsed_json_item['discount_status'] = "ACTIVE"
 
             processed_json_items_list.append(parsed_json_item)
 
