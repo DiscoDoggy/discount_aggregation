@@ -28,16 +28,27 @@ class FinalIngestor():
         self.extractions = Table("extractions", self.meta_data, autoload_with=self.engine)
         self.sites = Table("sites", self.meta_data, autoload_with=self.engine)
         self.item_change_records = Table("item_change_records", self.meta_data, autoload_with=self.engine)
+        print("Length of processed data:", len(self.processed_data))
 
     def ingest_data(self):
         import_error_rows = []
-        for row in self.processed_data:
+
+        for i in range (len(self.processed_data)):
+            row = self.processed_data[i]
+            
+            new_id = uuid.uuid4()
+            row['id'] = new_id
+            if i == 0:
+                insert_extractions_query = self.insert_into_extractions_table(row)
+                self.connection.execute(insert_extractions_query)
+                self.connection.commit()
+
             dupe_query_results = self.return_dupe_in_db(row)
+            print(dupe_query_results)
+
             if not dupe_query_results: #if list is empty (no dupe) add to db
-                new_id = uuid.uuid4()
-                row['id'] = new_id
                 insert_item_query = self.craft_insert_items_query(row)
-                result = self.connection.execute(insert_item_query)
+                self.connection.execute(insert_item_query)
             elif len(dupe_query_results) > 1:
                 #import error more than one dupe potential multiple duplications
                 print("UH OH MORE THAN ONE DUPLICATE COULD BE PRESENT FOR id from site:", row['id_from_site'])
@@ -45,7 +56,7 @@ class FinalIngestor():
                 continue
             else:
                 #update row with information that the source resource returned
-                update_query = self.craft_update_items_query(row, row['id'])
+                update_query = self.craft_update_items_query(row, dupe_query_results[0][0])
                 result = self.connection.execute(update_query)
 
             self.connection.commit()
@@ -54,19 +65,27 @@ class FinalIngestor():
     def return_dupe_in_db(self, row:dict) -> list:
         #dupe criteria
             #* id_from_site, item name, sale_start
-        query = self.items.select(
-            self.items.id_from_site, 
-            self.items.name, 
-            self.items.sale_start
+        query = select(
+            self.items.c.id,
+            self.items.c.id_from_site, 
+            self.items.c.name, 
+            self.items.c.sale_start
             ).where(
-            self.items.id_from_site == row['id_from_site'] and 
-            self.items.name == row['item_name'] and 
-            self.items.sale_start == row['sale_start_time']
+            self.items.c.id_from_site == row['id_from_site'] and 
+            self.items.c.name == row['item_name'] and 
+            self.items.c.sale_start == row['sale_start_time']
             )
         query_result = self.connection.execute(query)
 
-        return query_result
+        return query_result.all()
     
+    def insert_into_extractions_table(self, row):
+        insert_query = insert(self.extractions).values(
+            id=row['extraction_id']
+        )
+
+        return insert_query
+
     def craft_insert_items_query(self, row):
         insert_query = insert(self.items).values(
             id=row['id'],
@@ -78,7 +97,7 @@ class FinalIngestor():
             gender=row['clothing_gender_category'],
             colors=row['item_colors'],
             sizes=row['item_sizes'],
-            rating=row['rating'],
+            rating=row['ratings'],
             num_ratings = row['num_ratings'],
             sale_start = row['sale_start_time'],
             discount_status=row['discount_status'],
@@ -91,7 +110,7 @@ class FinalIngestor():
 
     def craft_update_items_query(self, row, id_to_update):
         update_query = self.items.update() \
-        .where(self.items.id == id_to_update) \
+        .where(self.items.c.id == id_to_update) \
         .values(
             id=row['id'],
             id_from_site=row['id_from_site'],
@@ -102,12 +121,12 @@ class FinalIngestor():
             gender=row['clothing_gender_category'],
             colors=row['item_colors'],
             sizes=row['item_sizes'],
-            rating=row['rating'],
+            rating=row['ratings'],
             num_ratings = row['num_ratings'],
             sale_start = row['sale_start_time'],
             discount_status=row['discount_status'],
             site_id=row['site_id'],
-            extraction_id = row['extraction_id'],
+            #extraction_id = row['extraction_id'],
             image_links=row['image_links']
         )
 
@@ -123,15 +142,36 @@ class FinalIngestor():
         POSTGRES_NAME = os.getenv('POSTGRES_NAME')
 
         connection_url = f'postgresql://{POSTGRES_USERNAME}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_NAME}'
-        engine = create_engine(connection_url, echo=True)
+        engine = create_engine(connection_url, echo=False)
 
         return engine
     
-def runner():
-    mylist = [{}]
+def test_runner():
+
+    row = {
+        'id_from_site': "12345",
+        'item_name': 'Example Item',
+        'link_to_item': 'http://example.com/item',
+        'base_price': 49.99,
+        'promo_price': 39.99,
+        'clothing_gender_category': 'Unisex',
+        'item_colors': ['Red', 'Blue', 'Green'],
+        'item_sizes': ['S', 'M', 'L', 'XL'],
+        'ratings': 4.5,
+        'num_ratings': 120,
+        'sale_start_time': '2024-05-01',
+        'discount_status': 'ACTIVE',
+        'site_id': 1,
+        'extraction_id': uuid.uuid4(),
+        'image_links': [
+            'http://example.com/image1.jpg',
+            'http://example.com/image2.jpg'
+        ]
+    }
+
+    mylist = []
+    mylist.append(row)
     ingestion_object = FinalIngestor(mylist)
 
     ingestion_object.ingest_data()
-
-runner()
-
+# runner()

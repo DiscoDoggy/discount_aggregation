@@ -5,6 +5,7 @@ from staging_ingestor import *
 from uniqlo_constants import *
 from base_transformer import *
 from uniqlo_transformer import *
+from final_ingestor import *
 import json
 import uuid
 import datetime
@@ -24,6 +25,9 @@ class StoreDriver:
         json_items_list = self.collect_data_for_ingestion(unprocessed_json_item_info)
         results = self.ingestor.ingest_data(json_items_list)
         transformed_data = self.transformer.transform_data(self.extraction_id)
+        final_ingestor_object = FinalIngestor(transformed_data)
+        final_ingestor_object.ingest_data()
+
 
         # print(transformed_data)
 
