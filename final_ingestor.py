@@ -61,6 +61,43 @@ class FinalIngestor():
 
             self.connection.commit()
 
+    def update_db_discount_statuses(self, site_id:int):
+        #use the same criteria as dupe criteria
+        # id_from_site, item_name, sale_start
+
+        active_discount_query = select(
+            self.items.c.id,
+            self.items.c.id_from_site,
+            self.items.c.name,
+            self.items.c.sale_start
+        ).where(
+            self.items.site_id == site_id and
+            self.items.c.discount_status == 'ACTIVE'
+        )
+
+        #list of tuples
+        query_results = self.connection.execute(active_discount_query).all()
+
+        active_db_discount = {}
+        for result in query_results:
+            active_db_discount[result.id_from_site] = result
+
+        extracted_db_discounts = {}
+        for item in self.processed_data:
+            extracted_db_discounts[item['id_from_site']] = item
+
+        for result_item_id in active_db_discount:
+            if result_item_id not in extracted_db_discounts:
+                #mark as inactive
+                result_dict = active_db_discount[result_item_id]
+                id_to_update = result_dict.id_from_site
+
+                update_query = self.items.update() \
+                .where(self.items.c.id == id_to_update) \
+                .values(discount_status = 'INACTIVE')
+                self.connection.execute(update_query)
+                self.connection.commit()
+
 
     def return_dupe_in_db(self, row:dict) -> list:
         #dupe criteria
@@ -131,8 +168,7 @@ class FinalIngestor():
         )
 
         return update_query
-
-         
+  
     def connect_to_db(self):
         load_dotenv()
         POSTGRES_USERNAME = os.getenv('POSTGRES_USERNAME')
