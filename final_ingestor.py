@@ -32,6 +32,7 @@ class FinalIngestor():
 
     def ingest_data(self):
         import_error_rows = []
+        self.update_db_discount_statuses(1)
 
         for i in range (len(self.processed_data)):
             row = self.processed_data[i]
@@ -60,6 +61,8 @@ class FinalIngestor():
                 result = self.connection.execute(update_query)
 
             self.connection.commit()
+        self.connection.close()
+        self.engine.dispose()
 
     def update_db_discount_statuses(self, site_id:int):
         #use the same criteria as dupe criteria
@@ -71,7 +74,7 @@ class FinalIngestor():
             self.items.c.name,
             self.items.c.sale_start
         ).where(
-            self.items.site_id == site_id and
+            self.items.c.site_id == site_id and
             self.items.c.discount_status == 'ACTIVE'
         )
 
@@ -90,7 +93,9 @@ class FinalIngestor():
             if result_item_id not in extracted_db_discounts:
                 #mark as inactive
                 result_dict = active_db_discount[result_item_id]
-                id_to_update = result_dict.id_from_site
+                id_to_update = result_dict.id
+
+                print("ID TO UPDATE:", id_to_update)
 
                 update_query = self.items.update() \
                 .where(self.items.c.id == id_to_update) \
