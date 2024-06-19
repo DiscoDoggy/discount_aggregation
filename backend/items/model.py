@@ -15,3 +15,4 @@ class Item(BaseModel):
     image_links : list[str]
     link : str
     site_name : str | None=None
+    discount_status : str | None=None

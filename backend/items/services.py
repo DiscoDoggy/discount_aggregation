@@ -57,6 +57,33 @@ class ItemHandler():
 
         return query_result
     
+    def get_items_by_gender(self, gender : str):
+        print(gender.upper())
+        query = select(
+            self.items.c.name,
+            self.items.c.base_price,
+            self.items.c.promo_price,
+            self.items.c.gender,
+            self.items.c.colors,
+            self.items.c.sizes,
+            self.items.c.rating,
+            self.items.c.num_ratings,
+            self.items.c.sale_start,
+            self.items.c.image_links,
+            self.items.c.link,
+            self.sites.c.name.label('site_name'), 
+            self.items.c.discount_status
+        ).select_from(self.items).join(self.sites) \
+        .where(
+            self.items.c.gender == f"{gender.upper()}" 
+        ).where(
+            self.items.c.discount_status == "ACTIVE")
+        
+        
+        query_result = self.connection.execute(query)
+
+        return query_result
+    
 # def main():
 #     item_handler = ItemHandler()
 #     results = item_handler.get_all_items()
