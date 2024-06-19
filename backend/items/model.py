@@ -14,3 +14,4 @@ class Item(BaseModel):
     sale_start : date | None = None
     image_links : list[str]
     link : str
+    site_name : str | None=None
