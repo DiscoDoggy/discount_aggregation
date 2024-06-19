@@ -2,6 +2,7 @@ from sqlalchemy import create_engine, MetaData, Table, insert, update, select
 import os
 from dotenv import load_dotenv
 from pathlib import Path
+from sqlalchemy.orm import aliased
 # from sqlalchemy import select_from
 
 class ItemHandler():
@@ -47,7 +48,7 @@ class ItemHandler():
             self.items.c.sale_start,
             self.items.c.image_links,
             self.items.c.link,
-            self.sites.c.name 
+            self.sites.c.name.label('site_name') 
         ).select_from(self.items).join(self.sites).where(
             self.items.c.discount_status == "ACTIVE"
         )
