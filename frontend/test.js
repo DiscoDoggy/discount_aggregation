@@ -34,50 +34,52 @@ class StoreItem extends HTMLElement
 
 customElements.define("store-item", StoreItem);
 
-
-(function(){
-"use strict";
-
-
-
-
 async function get_item_data(url)
 {
-    try
-    {
+    console.log("entered get_item_data");
+    let response_body = null;
+    try{
         const response = await fetch(url);
-        if(!response.ok)
-        {
-            throw new Error(`Error. Response status: ${response.status}`);
+        if(!response.ok) {
+            throw new Error("Network response was not okay..." + response.status);
         }
-        var response_body = await response.json();
-        console.log(response_body);
+        console.log("Response received:", response);
+        response_body = await response.json();
+
+        console.log("Parsed JSON:", response_body);
     }
-    catch (error)
+    catch(error)
     {
         console.error("Fetch failure:", error);
     }
-
+    console.log("Parsed json before function return:", response_body);
     return response_body;
+
 }
 
 function write_items_to_page(json_items)
 {
-    const append_location = document.getElementsByClassName("item-grid-container");
-    json_items.forEach((item) => {
-        store_item = StoreItem(item);
+    var append_location = document.getElementById("item-grid-container");
+    console.log(append_location);
+    json_items.forEach((item) =>{
+        console.log(item.name);
+        var store_item = new StoreItem(item);
         append_location.appendChild(store_item);
     });
 
 }
 
-var json_items = get_item_data("http://127.0.0.1:8000/items/men/");
-// write_items_to_page(json_items)
+async function main() 
+{
+    var url = "http://127.0.0.1:8000/items/men";
+    json_items = await get_item_data(url);
+    write_items_to_page(json_items);
+}
+
+main();
 
 
-
-
-// url = "http://127.0.0.1:8000/items/men"
+// const url = "http://127.0.0.1:8000/items/men"
 
 // fetch (url, {
 //     method: "GET"
@@ -85,6 +87,4 @@ var json_items = get_item_data("http://127.0.0.1:8000/items/men/");
 // .then((json) => console.log(json));
 
 
-
-})();
 
