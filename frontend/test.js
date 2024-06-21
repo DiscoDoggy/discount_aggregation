@@ -12,21 +12,21 @@ class StoreItem extends HTMLElement
         `
         <div class="grid-item">
             <div class="grid-item-photo">
-                <img src = ${this.json_item.image_links[0]}>
+                <img class="item-card-image" src = ${this.json_item.image_links[0]}>
             </div>
             <div class = "grid-item-name">${this.json_item.name}</div>
             <div class = "grid-item-gender">${this.json_item.gender}</div>
             <div class="grid-color-sizes-container">
                 <div class="grid-colors">
-                    red, blue, green
+                    ${this.json_item.colors}
                 </div>
                 <div class="grid-sizes">
-                    S, M, L
+                ${this.json_item.sizes}
                 </div>
             </div>
-            <div class="grid-item-price">$29.90</div>
-            <div class="grid-item-rating">⭐5.0 (51)</div>
-            <div class="grid-item-store-name">Uniqlo</div>
+            <div class="grid-item-price">$${this.json_item.promo_price}</div>
+            <div class="grid-item-rating">⭐${this.json_item.rating} (${this.json_item.num_ratings})</div>
+            <div class="grid-item-store-name">${this.json_item.site_name}</div>
         </div>
         `
     }
@@ -38,7 +38,7 @@ async function get_item_data(url)
 {
     console.log("entered get_item_data");
     let response_body = null;
-    try{
+    try {
         const response = await fetch(url);
         if(!response.ok) {
             throw new Error("Network response was not okay..." + response.status);
@@ -59,10 +59,9 @@ async function get_item_data(url)
 
 function write_items_to_page(json_items)
 {
-    var append_location = document.getElementById("item-grid-container");
-    console.log(append_location);
+    const append_location = document.getElementById("item-grid-container");
     json_items.forEach((item) =>{
-        console.log(item.name);
+        item.promo_price = item.promo_price.toFixed(2);
         var store_item = new StoreItem(item);
         append_location.appendChild(store_item);
     });
@@ -77,14 +76,3 @@ async function main()
 }
 
 main();
-
-
-// const url = "http://127.0.0.1:8000/items/men"
-
-// fetch (url, {
-//     method: "GET"
-// }).then((response) => response.json())
-// .then((json) => console.log(json));
-
-
-

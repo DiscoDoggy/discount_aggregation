@@ -1,0 +1,34 @@
+#item-grid-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 33%, 33%;
+    gap: 10px;
+    justify-content: center;
+    justify-items: center;
+
+}
+
+.grid-item {
+    width: auto;
+    height:auto;
+    max-width: 300px;
+    max-height: 432.5;
+}
+
+.item-card-image {
+    height:auto;
+    width: auto;
+    max-width: 300px;
+    max-height: 300px;
+}
+
+.grid-item-name {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+
+/* .grid-item-photo {
+
+} */
