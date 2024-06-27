@@ -12,7 +12,11 @@
     width: auto;
     height:auto;
     max-width: 300px;
-    max-height: 432.5;
+    max-height: 432.5px;
+    min-height: 0px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 .item-card-image {
@@ -22,11 +26,15 @@
     max-height: 300px;
 }
 
-.grid-item-name {
+#sort-dropdown-content-container {
+    display:none;
+}
+
+/* .grid-item-name {
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
-}
+} */
 
 
 /* .grid-item-photo {

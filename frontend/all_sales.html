@@ -3,7 +3,6 @@
   <head>
     <meta charset="utf-8" />
     <title>All Sales</title>
-    <script type="text/javascript" src="test.js"></script>
     <link rel="stylesheet" href="style.css"/>
   </head>
   <body>
@@ -15,6 +14,19 @@
         <a href="#about">Kids & Babies</a>
     </div> 
     <p>This is the all sales page</p>
+    
+    <div class="sort-dropdown-container">
+        <button id="sort-button">Sort By</button>
+        <div id="sort-dropdown-content-container">
+            <ul>
+                <li>Price: Low to High</li>
+                <li>Price: High to Low</li>
+                <li>Sale Start Date</li>
+                <li>Rating: High to Low</li>
+            </ul>
+        </div>
+    </div>
+
     <div id="item-grid-container">
         <!-- <div class="grid-item">
             <div class="grid-item-photo">
@@ -35,6 +47,8 @@
             <div class="grid-item-store-name">Uniqlo</div>
         </div> -->
     </div>
+
+    <script type="text/javascript" src="test.js"></script>
   </body>
 </html>
 

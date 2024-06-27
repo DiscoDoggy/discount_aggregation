@@ -61,11 +61,37 @@ function write_items_to_page(json_items)
 {
     const append_location = document.getElementById("item-grid-container");
     json_items.forEach((item) =>{
-        item.promo_price = item.promo_price.toFixed(2);
+        item.promo_price = item.promo_price.toFixed(2); // sets precision of values to two decimal points (should probably be done in preprocessing)
+        
         var store_item = new StoreItem(item);
         append_location.appendChild(store_item);
     });
 
+}
+
+function handle_sort_button()
+{
+    //for the drop down container to appear when clicking a buton
+    var sort_dropdown_container = document.getElementById("sort-dropdown-content-container");
+    sort_dropdown_container.style.display = "block";
+    console.log("button clicked");
+}
+
+function init_events()
+{
+    const sort_button = document.getElementById("sort-button");
+    console.log(sort_button);
+    sort_button.addEventListener("click", handle_sort_button);
+    console.log(sort_button);
+}
+
+window.onclick = (event) => {
+    var sort_drop_down_container = document.getElementById("sort-dropdown-content-container");
+
+    if (!event.target.matches("#sort-button") && !event.target.matches("#sort-dropdown-content-container")) {
+        console.log("Turning back to None");
+        sort_drop_down_container.style.display = "none";
+    }
 }
 
 async function main() 
@@ -73,6 +99,12 @@ async function main()
     var url = "http://127.0.0.1:8000/items/men";
     json_items = await get_item_data(url);
     write_items_to_page(json_items);
+
 }
 
+
+init_events(); //can be done async at same time as fetches, no overlap
+console.log("hello world");
 main();
+
+
