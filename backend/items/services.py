@@ -57,7 +57,7 @@ class ItemHandler():
 
         return query_result
     
-    def get_items_by_gender(self, gender : str):
+    def get_items_by_gender(self, gender : str, sort_key: str=None):
         print(gender.upper())
         query = select(
             self.items.c.name,
@@ -79,7 +79,17 @@ class ItemHandler():
         ).where(
             self.items.c.discount_status == "ACTIVE")
         
-        
+        if sort_key == "price_l_h":
+            query = query.order_by(self.items.c.promo_price.desc())
+        elif sort_key == "price_h_l":
+            query = query.order_by(self.items.c.promo_price.asc())
+        elif sort_key == "sort_start-date":
+            query = query.order_by(self.items.c.sale_start.desc())
+        elif sort_key == "sort_rating":
+            query = query.order_by(self.items.c.rating.desc())
+
+        print(query)
+
         query_result = self.connection.execute(query)
 
         return query_result

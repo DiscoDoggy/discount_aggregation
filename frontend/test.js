@@ -33,6 +33,7 @@ class StoreItem extends HTMLElement
 }
 
 customElements.define("store-item", StoreItem);
+let GLOBAL_current_endpoint = "";
 
 async function get_item_data(url)
 {
@@ -69,6 +70,13 @@ function write_items_to_page(json_items)
 
 }
 
+function remove_items_from_page() {
+    const item_container = document.getElementById("item-grid-container");
+    for(const child of item_container.children) {
+        child.remove();
+    } 
+}
+
 function handle_sort_button()
 {
     //for the drop down container to appear when clicking a buton
@@ -77,18 +85,42 @@ function handle_sort_button()
     console.log("button clicked");
 }
 
+async function fetch_sorted_items(sort_param) {
+    console.log("SORTING BUTTON CLICKED");
+    var url = GLOBAL_current_endpoint;
+    query_symb_index = url.indexOf("?");
+    
+    if (query_symb_index != -1) {
+        url = url.substring(0,query_symb_index - 1);
+    }
+
+    url = url + `?sort_key=${sort_param}`;
+    console.log(`URL: ${url}`);
+    GLOBAL_current_endpoint = url;
+    
+    sorted_items_json = await get_item_data(url);
+    remove_items_from_page();
+    // write_items_to_page(sorted_items_json);
+
+}
+
 function init_events()
 {
     const sort_button = document.getElementById("sort-button");
-    console.log(sort_button);
     sort_button.addEventListener("click", handle_sort_button);
-    console.log(sort_button);
+
+    const sort_dropdown_children = document.getElementById("sort-dropdown-list");
+    for (const child of sort_dropdown_children.children) {
+        child.addEventListener("click", ()=> {
+            fetch_sorted_items(child.getAttribute("id"));
+        });
+    }    
 }
 
 window.onclick = (event) => {
     var sort_drop_down_container = document.getElementById("sort-dropdown-content-container");
 
-    if (!event.target.matches("#sort-button") && !event.target.matches("#sort-dropdown-content-container")) {
+    if (!event.target.matches("#sort-button") && !event.target.matches("#sort-dropdown-content-container") && !event.target.matches("#sort-dropdown-list")) {
         console.log("Turning back to None");
         sort_drop_down_container.style.display = "none";
     }
@@ -96,15 +128,17 @@ window.onclick = (event) => {
 
 async function main() 
 {
-    var url = "http://127.0.0.1:8000/items/men";
+    var url = "http://127.0.0.1:8000/items/men?sort_key=sort_rating";
+    GLOBAL_current_endpoint = url;
     json_items = await get_item_data(url);
     write_items_to_page(json_items);
-
+    
 }
 
 
-init_events(); //can be done async at same time as fetches, no overlap
+ //can be done async at same time as fetches, no overlap
 console.log("hello world");
 main();
+init_events();
 
 

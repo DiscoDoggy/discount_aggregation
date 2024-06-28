@@ -30,6 +30,10 @@
     display:none;
 }
 
+li {
+    list-style-type: none;
+}
+
 /* .grid-item-name {
     text-overflow: ellipsis;
     white-space: nowrap;
