@@ -35,7 +35,7 @@ class ItemHandler():
 
         load_dotenv(dotenv_path=env_path)
 
-    def get_all_items(self):
+    def get_all_items(self, sort_key:str = None):
         query = select(
             self.items.c.name,
             self.items.c.base_price,
@@ -52,6 +52,15 @@ class ItemHandler():
         ).select_from(self.items).join(self.sites).where(
             self.items.c.discount_status == "ACTIVE"
         )
+
+        if sort_key == "price_l_h":
+            query = query.order_by(self.items.c.promo_price.asc())
+        elif sort_key == "price_h_l":
+            query = query.order_by(self.items.c.promo_price.desc())
+        elif sort_key == "sort_start-date":
+            query = query.order_by(self.items.c.sale_start.desc())
+        elif sort_key == "sort_rating":
+            query = query.order_by(self.items.c.rating.desc())
 
         query_result = self.connection.execute(query)
 
@@ -80,15 +89,13 @@ class ItemHandler():
             self.items.c.discount_status == "ACTIVE")
         
         if sort_key == "price_l_h":
-            query = query.order_by(self.items.c.promo_price.desc())
-        elif sort_key == "price_h_l":
             query = query.order_by(self.items.c.promo_price.asc())
+        elif sort_key == "price_h_l":
+            query = query.order_by(self.items.c.promo_price.desc())
         elif sort_key == "sort_start-date":
             query = query.order_by(self.items.c.sale_start.desc())
         elif sort_key == "sort_rating":
             query = query.order_by(self.items.c.rating.desc())
-
-        print(query)
 
         query_result = self.connection.execute(query)
 

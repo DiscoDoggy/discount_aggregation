@@ -130,7 +130,7 @@ window.onclick = (event) => {
 
 async function main() 
 {
-    var url = "http://127.0.0.1:8000/items/men";
+    var url = "http://127.0.0.1:8000/items";
     GLOBAL_current_endpoint = url;
     json_items = await get_item_data(url);
     write_items_to_page(json_items);

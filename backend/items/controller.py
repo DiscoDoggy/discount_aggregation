@@ -20,10 +20,10 @@ item_handler = services.ItemHandler()
 async def root():
     return {"message" : "hello world, this is my backend"}
 
-@app.get("/items/", response_model = list[Item])
-def get_all_items():
+@app.get("/items", response_model = list[Item])
+def get_all_items(sort_key: str | None=None):
     #unprocessed... list of elements that sqlalchemy returned
-    unprocessed_items = item_handler.get_all_items()
+    unprocessed_items = item_handler.get_all_items(sort_key)
     items_list = []
     for item in unprocessed_items:
         items_list.append(item)
@@ -31,7 +31,7 @@ def get_all_items():
     return items_list
 
 @app.get("/items/{gender}", response_model = list[Item])
-def get_items_by_gender(gender: str, sort_key: str = None):
+def get_items_by_gender(gender: str, sort_key: str | None = None):
     # unprocessed... list of elements that sqlalchemy returned
     if sort_key != None:
         unprocessed_items = item_handler.get_items_by_gender(gender, sort_key)
