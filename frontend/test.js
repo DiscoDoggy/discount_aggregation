@@ -72,7 +72,9 @@ function write_items_to_page(json_items)
 
 function remove_items_from_page() {
     const item_container = document.getElementById("item-grid-container");
-    for(const child of item_container.children) {
+    const item_children = Array.from(item_container.children);
+    for(let child of item_children) {
+        console.log(child.textContent);
         child.remove();
     } 
 }
@@ -91,7 +93,7 @@ async function fetch_sorted_items(sort_param) {
     query_symb_index = url.indexOf("?");
     
     if (query_symb_index != -1) {
-        url = url.substring(0,query_symb_index - 1);
+        url = url.substring(0,query_symb_index);
     }
 
     url = url + `?sort_key=${sort_param}`;
@@ -99,8 +101,7 @@ async function fetch_sorted_items(sort_param) {
     GLOBAL_current_endpoint = url;
     
     sorted_items_json = await get_item_data(url);
-    remove_items_from_page();
-    // write_items_to_page(sorted_items_json);
+    write_items_to_page(sorted_items_json);
 
 }
 
@@ -112,6 +113,7 @@ function init_events()
     const sort_dropdown_children = document.getElementById("sort-dropdown-list");
     for (const child of sort_dropdown_children.children) {
         child.addEventListener("click", ()=> {
+            remove_items_from_page();
             fetch_sorted_items(child.getAttribute("id"));
         });
     }    
@@ -128,7 +130,7 @@ window.onclick = (event) => {
 
 async function main() 
 {
-    var url = "http://127.0.0.1:8000/items/men?sort_key=sort_rating";
+    var url = "http://127.0.0.1:8000/items/men";
     GLOBAL_current_endpoint = url;
     json_items = await get_item_data(url);
     write_items_to_page(json_items);
