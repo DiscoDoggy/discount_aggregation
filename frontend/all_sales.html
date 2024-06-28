@@ -14,7 +14,50 @@
         <a href="#about">Kids & Babies</a>
     </div> 
     <p>This is the all sales page</p>
-    
+
+    <div class="filter-window-container">
+        <div id="price-filter-container">
+            <p>Price</p>
+            <input type="checkbox">
+                <label>Any</label>
+            <input type="checkbox">
+                <label> $0 - $20</label>
+            <input type="checkbox">
+                <label> $20 - $40</label>
+            <input type="checkbox">
+                <label> $40 - $60</label>
+            <input type="checkbox">
+                <label> $60 - $80</label>
+            <input type="checkbox">
+                <label> $80 - $100</label>
+            <input type="checkbox">
+                <label>$100+</label>
+        </div>
+        <div id="sizes-filter-container">
+            <p>+Sizes</p>
+            <input type="checkbox">
+                <label>Any</label>
+            <input type="checkbox">
+                <label for="Test size">Test size</label>
+            <input type="checkbox">
+                <label for="test size 2">Test size 2</label>
+        </div>
+        <div id="color-filter-container">
+            <p>Colors</p>
+            <input type="checkbox">
+                <label>Any</label>
+            <input type="checkbox">
+                <label for="test red"> test red</label>
+        <div id="rating-filter-container">
+            <p>Rating</p>
+            <input type="range" min="Unrated" max="5" value="2.5">
+        </div>
+        </div>
+        <button id="submit-filter-button">Submit Filter Query</button>
+    </div>
+    <div class="filter-button-container">
+        <button id="filter-button">Filter</button>
+    </div>
     <div class="sort-dropdown-container">
         <button id="sort-button">Sort By</button>
         <div id="sort-dropdown-content-container">
@@ -28,24 +71,6 @@
     </div>
 
     <div id="item-grid-container">
-        <!-- <div class="grid-item">
-            <div class="grid-item-photo">
-                <img src = "https://image.uniqlo.com/UQ/ST3/us/imagesgoods/463957/item/usgoods_56_463957_3x4.jpg?width=250">
-            </div>
-            <div class = "grid-item-name">Denim Jacket</div>
-            <div class = "grid-item-gender">Unisex</div>
-            <div class="grid-color-sizes-container">
-                <div class="grid-colors">
-                    red, blue, green
-                </div>
-                <div class="grid-sizes">
-                    S, M, L
-                </div>
-            </div>
-            <div class="grid-item-price">$29.90</div>
-            <div class="grid-item-rating">⭐5.0 (51)</div>
-            <div class="grid-item-store-name">Uniqlo</div>
-        </div> -->
     </div>
 
     <script type="text/javascript" src="test.js"></script>
