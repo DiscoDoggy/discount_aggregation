@@ -23,7 +23,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
       </div>
       <div class="offcanvas-body">
-        <p>Try scrolling the rest of the page to see this option in action.</p>
+        <p>Select your variety of filters!</p>
         <div class="filter-window-container">
             <div id="price-filter-container">
                 <input id="min-price-filter-input" type="number" min="0" placeholder="min $" step="any">
@@ -58,24 +58,25 @@
         </div>
       </div>
     </div>
-  
-    <div class="sort-dropdown-container">
-        <button id="sort-button">Sort By</button>
-        <div id="sort-dropdown-content-container">
-            <ul id = "sort-dropdown-list">
-                <li id="price_l_h">Price: Low to High</li>
-                <li id="price_h_l">Price: High to Low</li>
-                <li id="sort_start_date">Sale Start Date</li>
-                <li id="sort_rating">Rating: High to Low</li>
-            </ul>
-        </div>
+
+    <div class="dropdown">
+        <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+          Sort
+        </button>
+        <ul class="dropdown-menu" id="sort-dropdown-list">
+            <li class="dropdown-item" id="price_l_h">Price: Low to High</li>
+            <li class="dropdown-item" id="price_h_l">Price: High to Low</li>
+            <li class="dropdown-item" id="sort_start_date">Sale Start Date</li>
+            <li class="dropdown-item" id="sort_rating">Rating: High to Low</li>
+        </ul>
     </div>
 
     <div id="item-grid-container">
     </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js" integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V" crossorigin="anonymous"></script>
     <script type="text/javascript" src="test.js"></script>
   </body>
 </html>

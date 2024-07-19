@@ -131,13 +131,6 @@ function remove_items_from_page() {
     } 
 }
 
-function handle_sort_button()
-{
-    //for the drop down container to appear when clicking a buton
-    var sort_dropdown_container = document.getElementById("sort-dropdown-content-container");
-    sort_dropdown_container.style.display = "block";
-    console.log("button clicked");
-}
 
 function handle_filtering() {
     //we want to get every box that is checked and create some sort of either json body
@@ -166,8 +159,8 @@ async function fetch_sorted_items(sort_param) {
 
 function init_events()
 {
-    const sort_button = document.getElementById("sort-button");
-    sort_button.addEventListener("click", handle_sort_button);
+    // const sort_button = document.getElementById("sort-button");
+    // sort_button.addEventListener("click", handle_sort_button);
 
     const sort_dropdown_children = document.getElementById("sort-dropdown-list");
     for (const child of sort_dropdown_children.children) {
@@ -181,14 +174,14 @@ function init_events()
     submit_filter_button.addEventListener("click", handle_filtering);
 }
 
-window.onclick = (event) => {
-    var sort_drop_down_container = document.getElementById("sort-dropdown-content-container");
+// window.onclick = (event) => {
+//     var sort_drop_down_container = document.getElementById("sort-dropdown-content-container");
 
-    if (!event.target.matches("#sort-button") && !event.target.matches("#sort-dropdown-content-container") && !event.target.matches("#sort-dropdown-list")) {
-        console.log("Turning back to None");
-        sort_drop_down_container.style.display = "none";
-    }
-}
+//     if (!event.target.matches("#sort-button") && !event.target.matches("#sort-dropdown-content-container") && !event.target.matches("#sort-dropdown-list")) {
+//         console.log("Turning back to None");
+//         sort_drop_down_container.style.display = "none";
+//     }
+// }
 
 async function main() 
 {
@@ -203,6 +196,6 @@ async function main()
  //can be done async at same time as fetches, no overlap
 console.log("hello world");
 main();
-// init_events();
+init_events();
 
 
