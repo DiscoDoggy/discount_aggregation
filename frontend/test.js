@@ -11,28 +11,58 @@ class StoreItem extends HTMLElement
         this.innerHTML = 
         `
         <div class="grid-item">
-            <div class="grid-item-photo">
-                <img class="item-card-image" src = ${this.json_item.image_links[0]}>
-            </div>
-            <div class = "grid-item-name">${this.json_item.name}</div>
-            <div class = "grid-item-gender">${this.json_item.gender}</div>
-            <div class="grid-color-sizes-container">
-                <div class="grid-colors">
-                    ${this.json_item.colors}
+            <div class="grid-item-content>
+                <div class="grid-item-store-name">${this.json_item.site_name}</div>
+                <div class="grid-item-photo">
+                    <img class="item-card-image" src = ${this.json_item.image_links[0]}>
                 </div>
-                <div class="grid-sizes">
-                ${this.json_item.sizes}
+                <div class="grid-text-area>
+                    <div class = "grid-item-name">${this.json_item.name}</div>
+                    <div class = "grid-item-gender">${this.json_item.gender}</div>
+                    <div class="grid-color-sizes-container">
+                        <div class="grid-colors">
+                        </div>
+                        <div class="grid-sizes">
+                        ${this.json_item.sizes}
+                        </div>
+                    </div>
+                    <div class="grid-item-price">$${this.json_item.promo_price}</div>
+                    <div class="grid-item-rating">⭐${this.json_item.rating} (${this.json_item.num_ratings})</div>
                 </div>
-            </div>
-            <div class="grid-item-price">$${this.json_item.promo_price}</div>
-            <div class="grid-item-rating">⭐${this.json_item.rating} (${this.json_item.num_ratings})</div>
-            <div class="grid-item-store-name">${this.json_item.site_name}</div>
+            </div>    
         </div>
         `
     }
 }
 
+class ColorBubble extends HTMLElement
+{
+    //for now this will be a string?? be good if we had a color code later like a #fc264 as example
+    constructor(item_color)
+    {
+        super();
+        this.item_color = item_color;
+    }
+    
+    connectedCallback()
+    {
+        this.innerHTML = 
+        `
+        <div class="color-bubble-container">
+            <div class="color-bubble">
+                <input class ="color-bubble-box" " type="checkbox"/>
+                <label for="color-checkbox" style="background-color:${this.item_color}></label>
+            </div>
+        </div>
+        `;
+
+        // this.style.color = `${this.item_color}`;
+    }
+
+}
+
 customElements.define("store-item", StoreItem);
+customElements.define("color-bubble", ColorBubble);
 let GLOBAL_current_endpoint = "";
 
 async function get_item_data(url)
@@ -61,11 +91,21 @@ async function get_item_data(url)
 function write_items_to_page(json_items)
 {
     const append_location = document.getElementById("item-grid-container");
+    
     json_items.forEach((item) =>{
         item.promo_price = item.promo_price.toFixed(2); // sets precision of values to two decimal points (should probably be done in preprocessing)
-        
         var store_item = new StoreItem(item);
         append_location.appendChild(store_item);
+
+        const color_append_location = store_item.getElementsByClassName("grid-colors");
+        var item_color_list = item.colors;
+
+        item_color_list.forEach((color) => {
+            var color_element = new ColorBubble(color);
+            color_append_location[0].appendChild(color_element);
+        });
+
+
     });
 
 }
@@ -85,6 +125,13 @@ function handle_sort_button()
     var sort_dropdown_container = document.getElementById("sort-dropdown-content-container");
     sort_dropdown_container.style.display = "block";
     console.log("button clicked");
+}
+
+function handle_filtering() {
+    //we want to get every box that is checked and create some sort of either json body
+    //for a request or we can do this with all query parameters and rely on the backend to
+    //parse out the restrictions
+    console.log("Helklafl");
 }
 
 async function fetch_sorted_items(sort_param) {
@@ -116,7 +163,10 @@ function init_events()
             remove_items_from_page();
             fetch_sorted_items(child.getAttribute("id"));
         });
-    }    
+    }
+    
+    const submit_filter_button = document.getElementById("submit-filter-button");
+    submit_filter_button.addEventListener("click", handle_filtering);
 }
 
 window.onclick = (event) => {
@@ -130,7 +180,7 @@ window.onclick = (event) => {
 
 async function main() 
 {
-    var url = "http://127.0.0.1:8000/items";
+    var url = "http://127.0.0.1:8000/items/men";
     GLOBAL_current_endpoint = url;
     json_items = await get_item_data(url);
     write_items_to_page(json_items);
@@ -141,6 +191,6 @@ async function main()
  //can be done async at same time as fetches, no overlap
 console.log("hello world");
 main();
-init_events();
+// init_events();
 
 
