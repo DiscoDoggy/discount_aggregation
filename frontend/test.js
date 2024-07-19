@@ -49,10 +49,10 @@ class ColorBubble extends HTMLElement
         this.innerHTML = 
         `
         <div class="color-bubble-container">
-            <div class="color-bubble">
-                <input class ="color-bubble-box" " type="checkbox"/>
-                <label for="color-checkbox" style="background-color:${this.item_color}></label>
-            </div>
+            <label class="color-option">
+                <input type="checkbox" name="color" value="red">
+                <span class="color-bubble" style="background-color: ${this.item_color};"></span>
+            </label>
         </div>
         `;
 
@@ -103,6 +103,7 @@ function write_items_to_page(json_items)
         item_color_list.forEach((color) => {
             var color_element = new ColorBubble(color);
             color_append_location[0].appendChild(color_element);
+
         });
 
 

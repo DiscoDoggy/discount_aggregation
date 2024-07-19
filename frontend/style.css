@@ -43,11 +43,24 @@ body {
     flex-direction: row;
 }
 
-.color-bubble-box {
-    border-radius: 50%;
-    background-color: red;
+/* .color-bubble-container {
+    display:flex;
+    gap: 100px;
+} */
+
+.color-option input[type="checkbox"] {
+    display: none;
 }
 
+.color-option .color-bubble {
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    border: 1px solid;
+    margin:1px;
+    /* cursor: pointer; */
+}
 
 #sort-dropdown-content-container {
     display:none;
