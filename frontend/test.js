@@ -16,19 +16,12 @@ class StoreItem extends HTMLElement
                 <div class="grid-item-photo">
                     <img class="item-card-image" src = ${this.json_item.image_links[0]}>
                 </div>
-                <div class="grid-text-area>
-                    <div class = "grid-item-name">${this.json_item.name}</div>
-                    <div class = "grid-item-gender">${this.json_item.gender}</div>
-                    <div class="grid-color-sizes-container">
-                        <div class="grid-colors">
-                        </div>
-                        <div class="grid-sizes">
-                        ${this.json_item.sizes}
-                        </div>
-                    </div>
-                    <div class="grid-item-price">$${this.json_item.promo_price}</div>
-                    <div class="grid-item-rating">⭐${this.json_item.rating} (${this.json_item.num_ratings})</div>
-                </div>
+                <div class = "grid-item-name">${this.json_item.name}</div>
+                <div class = "grid-item-gender">${this.json_item.gender}</div>
+                <div class="grid-colors"></div>
+                <div class="grid-sizes"></div>
+                <div class="grid-item-price">$${this.json_item.promo_price}</div>
+                <div class="grid-item-rating">⭐${this.json_item.rating} (${this.json_item.num_ratings})</div>
             </div>    
         </div>
         `
@@ -56,7 +49,6 @@ class ColorBubble extends HTMLElement
         </div>
         `;
 
-        // this.style.color = `${this.item_color}`;
     }
 
 }
@@ -92,7 +84,7 @@ function write_items_to_page(json_items)
 {
     const append_location = document.getElementById("item-grid-container");
     
-    json_items.forEach((item) =>{
+    json_items.forEach((item) => {
         item.promo_price = item.promo_price.toFixed(2); // sets precision of values to two decimal points (should probably be done in preprocessing)
         var store_item = new StoreItem(item);
         append_location.appendChild(store_item);
@@ -106,6 +98,25 @@ function write_items_to_page(json_items)
 
         });
 
+        let item_sizes = item.sizes;
+        let sizing_text = "";
+        if (item_sizes.length == 0)
+        {
+            sizing_text = "No sizing available";
+        }
+
+        else if (item_sizes.length == 1)
+        {
+            sizing_text = item_sizes[0];
+        }
+
+        else
+        {
+            sizing_text = `${item_sizes[0]} - ${item_sizes[item_sizes.length - 1]}`;
+        }
+
+        let item_size_div = store_item.getElementsByClassName("grid-sizes")[0];
+        item_size_div.textContent = sizing_text;
 
     });
 
@@ -115,7 +126,7 @@ function remove_items_from_page() {
     const item_container = document.getElementById("item-grid-container");
     const item_children = Array.from(item_container.children);
     for(let child of item_children) {
-        console.log(child.textContent);
+        // console.log(child.textContent);
         child.remove();
     } 
 }

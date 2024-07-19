@@ -1,5 +1,5 @@
 body {
-    background-color: rgb(238, 238, 238);
+    background-color: #DCDCDC;
 }
 
 #item-grid-container {
@@ -14,18 +14,28 @@ body {
 }
 
 .grid-item {
-    width: auto;
-    height:auto;
-    max-width: 300px;
-    max-height: 432.5px;
-    min-height: 0px;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    overflow: hidden;
+    display:flex;
+    flex-direction: column;
+    width:100%;
+    max-width:280px;
     background-color: rgb(250, 250, 250);
     border-radius:15px;
     padding:15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 
+}
+
+.grid-item-name {
+    width:100%;
+    overflow-wrap: break-word;
+    white-space:normal;
+    /* word-break: break-all; */
+}
+
+.grid-item-photo {
+    display:flex;
+    justify-content:center;
+    height:100%;
 }
 
 .item-card-image {
@@ -35,6 +45,7 @@ body {
     max-height: 250px;
     /* padding: 15px; */
     border-radius:25px;
+    /* justify-content: center; */
 
 }
 
@@ -43,10 +54,6 @@ body {
     flex-direction: row;
 }
 
-/* .color-bubble-container {
-    display:flex;
-    gap: 100px;
-} */
 
 .color-option input[type="checkbox"] {
     display: none;
@@ -59,7 +66,6 @@ body {
     border-radius: 50%;
     border: 1px solid;
     margin:1px;
-    /* cursor: pointer; */
 }
 
 #sort-dropdown-content-container {
