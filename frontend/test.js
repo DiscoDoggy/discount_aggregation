@@ -83,6 +83,7 @@ async function get_item_data(url)
 function write_items_to_page(json_items)
 {
     const append_location = document.getElementById("item-grid-container");
+    var color_set = new Set();
     
     json_items.forEach((item) => {
         item.promo_price = item.promo_price.toFixed(2); // sets precision of values to two decimal points (should probably be done in preprocessing)
@@ -95,6 +96,7 @@ function write_items_to_page(json_items)
         item_color_list.forEach((color) => {
             var color_element = new ColorBubble(color);
             color_append_location[0].appendChild(color_element);
+            color_set.add(color);
 
         });
 
@@ -120,6 +122,32 @@ function write_items_to_page(json_items)
 
     });
 
+    add_color_filters(color_set);
+
+
+}
+
+function add_color_filters(unique_colors)
+{
+    //takes in a set of colors
+    console.log("ENTERING ADD_COLOR_FILTERS");
+    var append_location = document.getElementById("color-filter-checkboxes");
+    for(const color of unique_colors)
+    {
+        var checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+
+        var checkbox_label = document.createElement("label");
+        checkbox_label.innerText = `${color}`;
+
+        append_location.appendChild(checkbox);
+        append_location.appendChild(checkbox_label);
+    }
+
+
+
+    console.log(append_location);
+    console.log(unique_colors);
 }
 
 function remove_items_from_page() {

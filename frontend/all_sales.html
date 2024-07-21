@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="style.css"/>
   </head>
   <body>
+
     <nav class="nav justify-content-center">
         <ul class="nav justify-content-center">
             <li class="nav-item">
@@ -36,11 +37,11 @@
         <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasWithBothOptions" aria-controls="offcanvasWithBothOptions">Filter</button>
         <div class="offcanvas offcanvas-start" data-bs-scroll="true" tabindex="-1" id="offcanvasWithBothOptions" aria-labelledby="offcanvasWithBothOptionsLabel">
         <div class="offcanvas-header">
-            <h5 class="offcanvas-title" id="offcanvasWithBothOptionsLabel">Filtering</h5>
+            <h4 class="offcanvas-title" id="offcanvasWithBothOptionsLabel">Filtering</h4>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body">
-            <p>Select your variety of filters!</p>
+            <h5>Price</h5>
             <div class="filter-window-container">
                 <div id="price-filter-container">
                     <input id="min-price-filter-input" type="number" min="0" placeholder="min $" step="any">
@@ -58,11 +59,13 @@
                 </div>
         
                 <div id="color-filter-container">
-                    <p>Colors</p>
-                    <input type="checkbox">
-                        <label>Any</label>
-                    <input type="checkbox">
-                        <label for="test red"> test red</label>
+                    <h5>Colors</h5>
+                    <div id="color-filter-checkboxes">
+                        <input type="checkbox">
+                            <label>Any</label>
+                        <input type="checkbox">
+                            <label for="test red"> test red</label>
+                    </div>
                 </div>
         
                 <div id="rating-filter-container">
