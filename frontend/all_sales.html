@@ -8,69 +8,87 @@
     <link rel="stylesheet" href="style.css"/>
   </head>
   <body>
-    <div class="main-nav-bar">
-        <a class="main-nav-element" href="#home">Home</a>
-        <a href="#allsales">All Discounts</a>
-        <a href="#news">Women</a>
-        <a href="#contact">Men</a>
-        <a href="#about">Kids & Babies</a>
-    </div>
-<!-- offcanvas slide out -->
-    <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasWithBothOptions" aria-controls="offcanvasWithBothOptions">Filter</button>
-    <div class="offcanvas offcanvas-start" data-bs-scroll="true" tabindex="-1" id="offcanvasWithBothOptions" aria-labelledby="offcanvasWithBothOptionsLabel">
-      <div class="offcanvas-header">
-        <h5 class="offcanvas-title" id="offcanvasWithBothOptionsLabel">Filtering</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-      </div>
-      <div class="offcanvas-body">
-        <p>Select your variety of filters!</p>
-        <div class="filter-window-container">
-            <div id="price-filter-container">
-                <input id="min-price-filter-input" type="number" min="0" placeholder="min $" step="any">
-                <input id="max-price-fitler-input" type="number" min="0" placeholder="max $" step="any">
-            </div>
-    
-            <div id="sizes-filter-container">
-                <p>+Sizes</p>
-                <input type="checkbox">
-                    <label>Any</label>
-                <input type="checkbox">
-                    <label for="Test size">Test size</label>
-                <input type="checkbox">
-                    <label for="test size 2">Test size 2</label>
-            </div>
-    
-            <div id="color-filter-container">
-                <p>Colors</p>
-                <input type="checkbox">
-                    <label>Any</label>
-                <input type="checkbox">
-                    <label for="test red"> test red</label>
-            </div>
-    
-            <div id="rating-filter-container">
-                <p>Rating</p>
-                <input type="range" min="Unrated" max="5" value="2.5">
-            </div>
-    
-            
-            <button id="submit-filters-button">Submit Filter Query</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="dropdown">
-        <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-          Sort
-        </button>
-        <ul class="dropdown-menu" id="sort-dropdown-list">
-            <li class="dropdown-item" id="price_l_h">Price: Low to High</li>
-            <li class="dropdown-item" id="price_h_l">Price: High to Low</li>
-            <li class="dropdown-item" id="sort_start_date">Sale Start Date</li>
-            <li class="dropdown-item" id="sort_rating">Rating: High to Low</li>
+    <nav class="nav justify-content-center">
+        <ul class="nav justify-content-center">
+            <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="#home">Home</a>
+            </li>
+            <li class="nav-item">
+            <a class="nav-link" href="#allsales">All Items</a>
+            </li>
+            <li class="nav-item">
+            <a class="nav-link" href="#women">Women</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#men">Men</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#kidsAndBabies">Kids and Babies</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#misc">Misc</a>
+            </li>
         </ul>
-    </div>
+    </nav>
 
+    <div id="sort-filter-container">
+        <!-- offcanvas filter slide out -->
+        <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasWithBothOptions" aria-controls="offcanvasWithBothOptions">Filter</button>
+        <div class="offcanvas offcanvas-start" data-bs-scroll="true" tabindex="-1" id="offcanvasWithBothOptions" aria-labelledby="offcanvasWithBothOptionsLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="offcanvasWithBothOptionsLabel">Filtering</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <p>Select your variety of filters!</p>
+            <div class="filter-window-container">
+                <div id="price-filter-container">
+                    <input id="min-price-filter-input" type="number" min="0" placeholder="min $" step="any">
+                    <input id="max-price-fitler-input" type="number" min="0" placeholder="max $" step="any">
+                </div>
+        
+                <div id="sizes-filter-container">
+                    <p>+Sizes</p>
+                    <input type="checkbox">
+                        <label>Any</label>
+                    <input type="checkbox">
+                        <label for="Test size">Test size</label>
+                    <input type="checkbox">
+                        <label for="test size 2">Test size 2</label>
+                </div>
+        
+                <div id="color-filter-container">
+                    <p>Colors</p>
+                    <input type="checkbox">
+                        <label>Any</label>
+                    <input type="checkbox">
+                        <label for="test red"> test red</label>
+                </div>
+        
+                <div id="rating-filter-container">
+                    <p>Rating</p>
+                    <input type="range" min="Unrated" max="5" value="2.5">
+                </div>
+        
+                
+                <button id="submit-filters-button">Submit Filter Query</button>
+            </div>
+        </div>
+        </div>
+
+        <!-- sort -->
+        <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Sort
+            </button>
+            <ul class="dropdown-menu" id="sort-dropdown-list">
+                <li class="dropdown-item" id="price_l_h">Price: Low to High</li>
+                <li class="dropdown-item" id="price_h_l">Price: High to Low</li>
+                <li class="dropdown-item" id="sort_start_date">Sale Start Date</li>
+                <li class="dropdown-item" id="sort_rating">Rating: High to Low</li>
+            </ul>
+        </div>
+    </div>
     <div id="item-grid-container">
     </div>
 

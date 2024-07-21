@@ -16,3 +16,7 @@ notes.txt
 
 #final database
 postgres_data
+
+#frontend files
+frontend/test.html
+
