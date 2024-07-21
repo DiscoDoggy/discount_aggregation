@@ -84,6 +84,7 @@ function write_items_to_page(json_items)
 {
     const append_location = document.getElementById("item-grid-container");
     var color_set = new Set();
+    var sizes_set = new Set();
     
     json_items.forEach((item) => {
         item.promo_price = item.promo_price.toFixed(2); // sets precision of values to two decimal points (should probably be done in preprocessing)
@@ -100,7 +101,12 @@ function write_items_to_page(json_items)
 
         });
 
-        let item_sizes = item.sizes;
+        var item_sizes = item.sizes;
+        item_sizes.forEach((size) => {
+            sizes_set.add(size);
+        });
+
+        
         let sizing_text = "";
         if (item_sizes.length == 0)
         {
@@ -123,8 +129,28 @@ function write_items_to_page(json_items)
     });
 
     add_color_filters(color_set);
+    add_sizes_filters(sizes_set);
 
 
+}
+
+function add_sizes_filters(unique_sizes)
+{
+    console.log("ENTERING ADD_SIZES_FILTERS");
+    var append_location = document.getElementById("sizes-filter-container");
+    var size_html = "";
+    for(const size of unique_sizes)
+    {
+        size_html +=
+        `
+        <input type="checkbox">
+        <label for="size">${size}</label>
+        `
+    }
+
+    append_location.insertAdjacentHTML("afterend", size_html);
+
+    
 }
 
 function add_color_filters(unique_colors)
@@ -143,11 +169,6 @@ function add_color_filters(unique_colors)
         append_location.appendChild(checkbox);
         append_location.appendChild(checkbox_label);
     }
-
-
-
-    console.log(append_location);
-    console.log(unique_colors);
 }
 
 function remove_items_from_page() {
@@ -201,15 +222,6 @@ function init_events()
     const submit_filter_button = document.getElementById("submit-filter-button");
     submit_filter_button.addEventListener("click", handle_filtering);
 }
-
-// window.onclick = (event) => {
-//     var sort_drop_down_container = document.getElementById("sort-dropdown-content-container");
-
-//     if (!event.target.matches("#sort-button") && !event.target.matches("#sort-dropdown-content-container") && !event.target.matches("#sort-dropdown-list")) {
-//         console.log("Turning back to None");
-//         sort_drop_down_container.style.display = "none";
-//     }
-// }
 
 async function main() 
 {
