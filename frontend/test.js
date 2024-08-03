@@ -182,9 +182,13 @@ function remove_items_from_page() {
 
 
 function handle_filtering() {
-    //we want to get every box that is checked and create some sort of either json body
-    //for a request or we can do this with all query parameters and rely on the backend to
-    //parse out the restrictions
+    //triggered when submit filters button is pressed
+    //need to go through each filter category and look for what
+    // check boxes or sliders or textboxes are filled in
+    //need to build a JSON request and make a json post request to 
+    //fast api endpoint to filter.
+    //remove previous items from page
+    //need to draw the filtered items on screen
     console.log("Helklafl");
 }
 

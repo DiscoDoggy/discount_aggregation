@@ -3,6 +3,8 @@ import os
 from dotenv import load_dotenv
 from pathlib import Path
 from sqlalchemy.orm import aliased
+from filterModel import FilterModel
+from sqlalchemy import null
 # from sqlalchemy import select_from
 
 class ItemHandler():
@@ -101,16 +103,58 @@ class ItemHandler():
 
         return query_result
     
+    def query_filter_items(self, category: str, filterCriteria:FilterModel):
+        query = select(
+            self.items.c.name,
+            self.items.c.base_price,
+            self.items.c.promo_price,
+            self.items.c.gender,
+            self.items.c.colors,
+            self.items.c.sizes,
+            self.items.c.rating,
+            self.items.c.num_ratings,
+            self.items.c.sale_start,
+            self.items.c.image_links,
+            self.items.c.link,
+            self.sites.c.name.label('site_name'), 
+            self.items.c.discount_status
+        ).select_from(self.items).join(self.sites)
+        
+        if category != "all":
+            query = query.where(self.items.c.gender == f"{category.upper()}")
+        if filterCriteria.min_price > 0.0:
+            query = query.where(self.items.c.promo_price >= filterCriteria.min_price)
+        if filterCriteria.max_price != 0.0:
+            query = query.where(self.items.c.promo_price <= filterCriteria.max_price)
+        if filterCriteria.sizes:
+            query = query.where(self.items.c.sizes.op("&&")(filterCriteria.sizes))
+        if filterCriteria.colors:
+            query = query.where(self.items.c.colors.op("&&")(filterCriteria.colors))
+        if filterCriteria.ratings:
+            for i in range(len(filterCriteria.ratings)):
+                filterCriteria.ratings[i] = round(filterCriteria.ratings[i])
+            query = query.where(self.items.c.rating.in_(filterCriteria.ratings))
+        print(str(query.compile()))
+        print("Parameteres", query.compile().params)
+        return self.connection.execute(query)
+    
 # def main():
 #     item_handler = ItemHandler()
-#     results = item_handler.get_all_items()
-#     # for row in results.mappings():
-#     #     print(type(row))
+#     category = "MEN"
+#     size_list = ["L"]
+#     filters = FilterModel(
+#         min_price=30.0,
+#         max_price = 40.0,
+#         sizes=size_list,
+#         colors=["RED", "BLUE", "GREY"],
+#         ratings = [4,5]
+#     )
+#     print("hello world")
+#     results = item_handler.get_filter_items_db(category, filters)
 #     count = 0
 #     for row in results.mappings():
-#         print(row)
-#         print(type(row))
 #         if count == 5:
 #             break
-#         count += 1
+#         count+= 1
+#         print(row)
 # main()

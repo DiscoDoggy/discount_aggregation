@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 import services
-from model import Item
+from itemModel import Item
+from filterModel import FilterModel
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -42,5 +43,14 @@ def get_items_by_gender(gender: str, sort_key: str | None = None, ):
     for item in unprocessed_items:
         items_list.append(item)
         print(item.rating)
+
+    return items_list
+
+@app.post("/items/{category}/filter/", response_model=list[Item])
+def get_filter_items(category: str, filterCriteria: FilterModel):
+    query_results = item_handler.query_filter_items_db(category, filterCriteria)
+    items_list = []
+    for item in query_results:
+        items_list.append(item)
 
     return items_list
