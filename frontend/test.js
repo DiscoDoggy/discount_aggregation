@@ -182,13 +182,11 @@ function remove_items_from_page() {
 
 
 function handle_filtering() {
-    //triggered when submit filters button is pressed
-    //need to go through each filter category and look for what
-    // check boxes or sliders or textboxes are filled in
-    //need to build a JSON request and make a json post request to 
-    //fast api endpoint to filter.
-    //remove previous items from page
-    //need to draw the filtered items on screen
+    //triggered when filter button is clicked
+    //assemble json request of filterModel
+    const min_price_input = document.getElementById("min-price-filter-input").value;
+    const max_price_input = document.getElementById("max-price-filter-input").value;
+
     console.log("Helklafl");
 }
 
@@ -210,6 +208,38 @@ async function fetch_sorted_items(sort_param) {
 
 }
 
+function price_validation(min_price_element, max_price_element)
+{
+    var min_price = min_price_element.value;
+    var max_price = max_price_element.value;
+
+    console.log("enter price validation");
+    if (min_price === "")
+    {
+        min_price_element.value = "";
+        min_price = 0;
+    }
+
+    if(max_price === "")
+    {
+        max_price_element.value = "";
+        max_price = 0;
+    }
+
+    min_price = Number(min_price);
+    max_price = Number(max_price);
+    if(max_price != 0 && min_price != 0 && min_price > max_price)
+    {
+        window.alert("Min price cannot be larger than max price!");
+    }
+
+    else if (min_price != 0 && max_price != 0 && max_price < min_price)
+    {
+        window.alert("Max price cannot be larger than min price!");
+    }
+
+}
+
 function init_events()
 {
     // const sort_button = document.getElementById("sort-button");
@@ -222,8 +252,22 @@ function init_events()
             fetch_sorted_items(child.getAttribute("id"));
         });
     }
-    
-    const submit_filter_button = document.getElementById("submit-filter-button");
+
+    const min_price_input = document.getElementById("min-price-filter-input");
+    const max_price_input = document.getElementById("max-price-filter-input");
+
+
+    min_price_input.addEventListener("input", ()=> {
+        price_validation(min_price_input, max_price_input);
+        console.log("Enter addEventListener for price input");
+    });
+
+    max_price_input.addEventListener("input", ()=>{
+        price_validation(min_price_input, max_price_input);
+        console.log("entered event for changing max_price_input");
+    });
+
+    const submit_filter_button = document.getElementById("submit-filters-button");
     submit_filter_button.addEventListener("click", handle_filtering);
 }
 
