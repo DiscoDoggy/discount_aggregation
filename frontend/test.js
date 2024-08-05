@@ -57,13 +57,26 @@ customElements.define("store-item", StoreItem);
 customElements.define("color-bubble", ColorBubble);
 let GLOBAL_current_endpoint = "";
 
-async function get_item_data(url)
+async function get_item_data(url, request_body)
 {
     console.log("entered get_item_data");
     let response_body = null;
+    var response = null;
     try {
-        const response = await fetch(url);
-        if(!response.ok) {
+
+
+        if (request_body === null)
+        {
+            response = await fetch(url);
+        }
+
+        else
+        {
+            response = await fetch(url, request_body);
+        }
+
+        if(!response.ok) 
+        {
             throw new Error("Network response was not okay..." + response.status);
         }
         console.log("Response received:", response);
@@ -163,6 +176,7 @@ function add_color_filters(unique_colors)
         var checkbox = document.createElement("input");
         checkbox.type = "checkbox";
         checkbox.className = "color-checkbox";
+        checkbox.checked = true;
 
         var checkbox_label = document.createElement("label");
         checkbox_label.innerText = `${color}`;
@@ -194,7 +208,8 @@ async function fetch_sorted_items(sort_param) {
     console.log(`URL: ${url}`);
     GLOBAL_current_endpoint = url;
     
-    sorted_items_json = await get_item_data(url);
+    sorted_items_json = await get_item_data(url, null);
+    remove_items_from_page();
     write_items_to_page(sorted_items_json);
 
 }
@@ -204,7 +219,6 @@ function init_events()
     const sort_dropdown_children = document.getElementById("sort-dropdown-list");
     for (const child of sort_dropdown_children.children) {
         child.addEventListener("click", ()=> {
-            remove_items_from_page();
             fetch_sorted_items(child.getAttribute("id"));
         });
     }
@@ -249,11 +263,20 @@ function init_events()
         });
     }
 
-
-
+    var rating_checkboxes = document.getElementsByClassName("rating-checkbox");
 
     const submit_filter_button = document.getElementById("submit-filters-button");
-    submit_filter_button.addEventListener("click", handle_filtering);
+    submit_filter_button.addEventListener("click", ()=> {
+        handle_filtering(
+            min_price_input.value,
+            max_price_input.value,
+            any_size_checkbox,
+            size_checkboxes,
+            any_color_checkbox,
+            color_checkboxes,
+            rating_checkboxes
+        );
+    });
 }
 
 function handle_any_checkbox(any_checkbox_element, target_checkboxes_classname)
@@ -328,20 +351,72 @@ function price_validation(min_price_element, max_price_element)
 
 }
 
-function handle_filtering() {
-    //triggered when filter button is clicked
-    //assemble json request of filterModel
-    const min_price_input = document.getElementById("min-price-filter-input").value;
-    const max_price_input = document.getElementById("max-price-filter-input").value;
+async function handle_filtering (
+    min_price, 
+    max_price,
+    any_size_checkbox,
+    size_checkboxes,
+    any_color_checkbox,
+    color_checkboxes,
+    rating_checkboxes
+) {
 
-    console.log("Helklafl");
+    if (min_price === "")
+    {
+        min_price = 0;
+    }
+
+    if(max_price === "")
+    {
+        max_price = 0;
+    }
+
+    var sizes = [];
+    if(!any_size_checkbox.checked)
+    {
+        sizes = size_checkboxes;
+    }
+
+    var colors = [];
+    if(!any_color_checkbox.checked)
+    {
+        colors = color_checkboxes;
+    }
+
+    var ratings = [];
+    for(let i = 0; i < rating_checkboxes.length; i++)
+    {
+        if(rating_checkboxes[i].checked)
+        {
+            ratings.push(i);
+        }
+    }
+
+    const request_params = {
+        method:"POST",
+        body: JSON.stringify({
+            min_price: min_price,
+            max_price: max_price,
+            sizes: sizes,
+            colors: colors,
+            ratings
+        }),
+        headers: {
+            "Content-Type": "application/json",
+        }
+    }
+
+    json_items = await get_item_data("http://127.0.0.1:8000/items/men/filter", request_params);
+    remove_items_from_page();
+    write_items_to_page(json_items);
+   
 }
 
 async function main() 
 {
     var url = "http://127.0.0.1:8000/items/men";
     GLOBAL_current_endpoint = url;
-    json_items = await get_item_data(url);
+    json_items = await get_item_data(url, null);
     write_items_to_page(json_items);
     init_events();
 }
