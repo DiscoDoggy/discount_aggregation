@@ -231,31 +231,7 @@ function init_events()
     for (let i = 0; i < size_checkboxes.length; i++)
     {
         size_checkboxes[i].addEventListener("click", ()=> {    
-            var is_all_sizes_checked = true;       
-            var boolean_checks = [];
-            for(let i = 0; i < size_checkboxes.length; i++)
-            {
-                if (!size_checkboxes[i].checked)
-                {
-                    is_all_sizes_checked = false;
-                    console.log(`all sizes checked status: ${is_all_sizes_checked}`)
-                }
-
-                boolean_checks.push(size_checkboxes[i].checked);
-
-            }
-            
-            if (is_all_sizes_checked)
-            {
-                any_size_checkbox.checked = true;
-            }
-
-            else
-            {
-                any_size_checkbox.checked = false;
-            }
-
-            console.log(boolean_checks);
+            handle_subcategory_checkbox_change(any_size_checkbox, "size-checkbox");
             
         });
     }
@@ -284,6 +260,26 @@ function handle_any_checkbox(any_checkbox_element, target_checkboxes_classname)
             target_checkboxes[i].checked = false;
         }
     }
+}
+
+function handle_subcategory_checkbox_change(any_checkbox_element, target_checkboxes_class_name)
+{
+    var target_checkboxes = document.getElementsByClassName(target_checkboxes_class_name);
+    var are_all_sizes_checked = true;
+    for (let i = 0; i < target_checkboxes.length; i++)
+    {
+        if(!target_checkboxes[i].checked)
+        {
+            are_all_sizes_checked = false;
+            any_checkbox_element.checked = false;
+        }
+    }
+
+    if(are_all_sizes_checked)
+    {
+        any_checkbox_element.checked = true;
+    }
+
 }
 
 function price_validation(min_price_element, max_price_element)
