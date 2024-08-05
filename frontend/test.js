@@ -162,6 +162,7 @@ function add_color_filters(unique_colors)
     {
         var checkbox = document.createElement("input");
         checkbox.type = "checkbox";
+        checkbox.className = "color-checkbox";
 
         var checkbox_label = document.createElement("label");
         checkbox_label.innerText = `${color}`;
@@ -232,9 +233,22 @@ function init_events()
     {
         size_checkboxes[i].addEventListener("click", ()=> {    
             handle_subcategory_checkbox_change(any_size_checkbox, "size-checkbox");
-            
         });
     }
+
+    var any_color_checkbox = document.getElementById("any-color-checkbox");
+    var color_checkboxes = document.getElementsByClassName("color-checkbox");
+    any_color_checkbox.addEventListener("click", ()=> {
+        handle_any_checkbox(any_color_checkbox, "color-checkbox");
+    });
+
+    for(let i = 0; i < color_checkboxes.length; i++)
+    {
+        color_checkboxes[i].addEventListener("click", ()=>{
+            handle_subcategory_checkbox_change(any_color_checkbox, "color-checkbox");
+        });
+    }
+
 
 
 
