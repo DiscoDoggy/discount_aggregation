@@ -143,7 +143,7 @@ function add_sizes_filters(unique_sizes)
     {
         size_html +=
         `
-        <input type="checkbox">
+        <input type="checkbox" class="size-checkbox" checked>
         <label for="size">${size}</label>
         `
     }
@@ -180,16 +180,6 @@ function remove_items_from_page() {
     } 
 }
 
-
-function handle_filtering() {
-    //triggered when filter button is clicked
-    //assemble json request of filterModel
-    const min_price_input = document.getElementById("min-price-filter-input").value;
-    const max_price_input = document.getElementById("max-price-filter-input").value;
-
-    console.log("Helklafl");
-}
-
 async function fetch_sorted_items(sort_param) {
     console.log("SORTING BUTTON CLICKED");
     var url = GLOBAL_current_endpoint;
@@ -206,6 +196,94 @@ async function fetch_sorted_items(sort_param) {
     sorted_items_json = await get_item_data(url);
     write_items_to_page(sorted_items_json);
 
+}
+
+function init_events()
+{
+    const sort_dropdown_children = document.getElementById("sort-dropdown-list");
+    for (const child of sort_dropdown_children.children) {
+        child.addEventListener("click", ()=> {
+            remove_items_from_page();
+            fetch_sorted_items(child.getAttribute("id"));
+        });
+    }
+
+    const min_price_input = document.getElementById("min-price-filter-input");
+    const max_price_input = document.getElementById("max-price-filter-input");
+
+    min_price_input.addEventListener("input", ()=> {
+        price_validation(min_price_input, max_price_input);
+        console.log("Enter addEventListener for price input");
+    });
+
+    max_price_input.addEventListener("input", ()=>{
+        price_validation(min_price_input, max_price_input);
+        console.log("entered event for changing max_price_input");
+    });
+
+    var any_size_checkbox = document.getElementById("any-size-checkbox");
+    any_size_checkbox.addEventListener("click", ()=> {
+        handle_any_checkbox(any_size_checkbox, "size-checkbox");
+    });
+
+    var size_checkboxes = document.getElementsByClassName("size-checkbox");
+
+    for (let i = 0; i < size_checkboxes.length; i++)
+    {
+        size_checkboxes[i].addEventListener("click", ()=> {    
+            var is_all_sizes_checked = true;       
+            var boolean_checks = [];
+            for(let i = 0; i < size_checkboxes.length; i++)
+            {
+                if (!size_checkboxes[i].checked)
+                {
+                    is_all_sizes_checked = false;
+                    console.log(`all sizes checked status: ${is_all_sizes_checked}`)
+                }
+
+                boolean_checks.push(size_checkboxes[i].checked);
+
+            }
+            
+            if (is_all_sizes_checked)
+            {
+                any_size_checkbox.checked = true;
+            }
+
+            else
+            {
+                any_size_checkbox.checked = false;
+            }
+
+            console.log(boolean_checks);
+            
+        });
+    }
+
+
+
+    const submit_filter_button = document.getElementById("submit-filters-button");
+    submit_filter_button.addEventListener("click", handle_filtering);
+}
+
+function handle_any_checkbox(any_checkbox_element, target_checkboxes_classname)
+{
+    var target_checkboxes = document.getElementsByClassName(target_checkboxes_classname);
+
+    if (any_checkbox_element.checked)
+    {
+        for(let i = 0; i < target_checkboxes.length; i++)
+        {
+            target_checkboxes[i].checked = true;
+        }
+    }
+    else
+    {
+        for(let i = 0; i < target_checkboxes.length; i++)
+        {
+            target_checkboxes[i].checked = false;
+        }
+    }
 }
 
 function price_validation(min_price_element, max_price_element)
@@ -240,35 +318,13 @@ function price_validation(min_price_element, max_price_element)
 
 }
 
-function init_events()
-{
-    // const sort_button = document.getElementById("sort-button");
-    // sort_button.addEventListener("click", handle_sort_button);
+function handle_filtering() {
+    //triggered when filter button is clicked
+    //assemble json request of filterModel
+    const min_price_input = document.getElementById("min-price-filter-input").value;
+    const max_price_input = document.getElementById("max-price-filter-input").value;
 
-    const sort_dropdown_children = document.getElementById("sort-dropdown-list");
-    for (const child of sort_dropdown_children.children) {
-        child.addEventListener("click", ()=> {
-            remove_items_from_page();
-            fetch_sorted_items(child.getAttribute("id"));
-        });
-    }
-
-    const min_price_input = document.getElementById("min-price-filter-input");
-    const max_price_input = document.getElementById("max-price-filter-input");
-
-
-    min_price_input.addEventListener("input", ()=> {
-        price_validation(min_price_input, max_price_input);
-        console.log("Enter addEventListener for price input");
-    });
-
-    max_price_input.addEventListener("input", ()=>{
-        price_validation(min_price_input, max_price_input);
-        console.log("entered event for changing max_price_input");
-    });
-
-    const submit_filter_button = document.getElementById("submit-filters-button");
-    submit_filter_button.addEventListener("click", handle_filtering);
+    console.log("Helklafl");
 }
 
 async function main() 
@@ -277,13 +333,10 @@ async function main()
     GLOBAL_current_endpoint = url;
     json_items = await get_item_data(url);
     write_items_to_page(json_items);
-    
+    init_events();
 }
 
-
- //can be done async at same time as fetches, no overlap
-console.log("hello world");
 main();
-init_events();
+
 
 
