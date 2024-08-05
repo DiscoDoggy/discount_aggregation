@@ -49,7 +49,7 @@ def get_items_by_gender(gender: str, sort_key: str | None = None, ):
 @app.post("/items/{category}/filter/", response_model=list[Item])
 def get_filter_items(category: str, filterCriteria: FilterModel):
     print_filter_criteria(filterCriteria)
-    query_results = item_handler.query_filter_items_db(category, filterCriteria)
+    query_results = item_handler.query_filter_items(category, filterCriteria)
     items_list = []
     for item in query_results:
         items_list.append(item)

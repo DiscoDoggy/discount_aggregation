@@ -141,10 +141,8 @@ function write_items_to_page(json_items)
 
     });
 
-    add_color_filters(color_set);
-    add_sizes_filters(sizes_set);
-
-
+    var size_and_color_set = [sizes_set, color_set];
+    return size_and_color_set;
 }
 
 function add_sizes_filters(unique_sizes)
@@ -156,8 +154,8 @@ function add_sizes_filters(unique_sizes)
     {
         size_html +=
         `
-        <input type="checkbox" class="size-checkbox" checked>
-        <label for="size">${size}</label>
+        <input type="checkbox" class="size-checkbox" id="${size}" checked>
+        <label for="${size}">${size}</label>
         `
     }
 
@@ -372,9 +370,14 @@ async function handle_filtering (
     }
 
     var sizes = [];
+    console.log(`any size checkbox checked status: ${any_size_checkbox.checked}`);
     if(!any_size_checkbox.checked)
     {
-        sizes = size_checkboxes;
+        for(let i = 0; i < size_checkboxes.length; i++)
+        {
+            if(size_checkboxes[i].checked)
+                sizes.push(size_checkboxes[i].id);
+        }
     }
 
     var colors = [];
@@ -417,7 +420,12 @@ async function main()
     var url = "http://127.0.0.1:8000/items/men";
     GLOBAL_current_endpoint = url;
     json_items = await get_item_data(url, null);
-    write_items_to_page(json_items);
+    
+    var size_and_color_set = write_items_to_page(json_items);
+    console.log(size_and_color_set);
+    add_sizes_filters(size_and_color_set[0]);
+    add_color_filters(size_and_color_set[1]);
+
     init_events();
 }
 

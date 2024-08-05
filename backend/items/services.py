@@ -119,6 +119,8 @@ class ItemHandler():
             self.sites.c.name.label('site_name'), 
             self.items.c.discount_status
         ).select_from(self.items).join(self.sites)
+
+        query = query.where(self.items.c.discount_status == "ACTIVE")
         
         if category != "all":
             query = query.where(self.items.c.gender == f"{category.upper()}")
