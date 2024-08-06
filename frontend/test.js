@@ -55,6 +55,8 @@ class ColorBubble extends HTMLElement
 
 customElements.define("store-item", StoreItem);
 customElements.define("color-bubble", ColorBubble);
+
+//basically state variables
 let GLOBAL_current_endpoint = "";
 let GLOBAL_filter_json = "";
 
@@ -286,6 +288,43 @@ function init_events()
             color_checkboxes,
             rating_checkboxes
         );
+    });
+
+    const default_filters_button = document.getElementById("default-filters-button");
+    default_filters_button.addEventListener("click", async ()=>{
+        var index = GLOBAL_current_endpoint.search("/filter");
+        if(index != -1)
+        {
+            GLOBAL_current_endpoint = GLOBAL_current_endpoint.substring(0, index);
+            json_items = await get_item_data(GLOBAL_current_endpoint, null);
+            remove_items_from_page();
+            write_items_to_page(json_items);
+
+            min_price_input.value = "";
+            max_price_input.value = "";
+            
+            any_size_checkbox.checked = true;
+            for(let i = 0; i < size_checkboxes.length; i++)
+            {
+                size_checkboxes[i].checked = true;
+            }
+    
+            any_color_checkbox.checked = true;
+            for(let i = 0; i < color_checkboxes.length; i++)
+            {
+                color_checkboxes[i].checked = true;
+            }
+    
+            for(let i = 0; i < rating_checkboxes.length; i++)
+            {
+                rating_checkboxes[i].checked = true;
+            }
+        }
+        else
+        {
+            alert("All default filters are currently active");
+        }
+
     });
 }
 
