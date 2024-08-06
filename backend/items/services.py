@@ -68,8 +68,8 @@ class ItemHandler():
 
         return query_result
     
-    def get_items_by_gender(self, gender : str, sort_key: str=None):
-        print(gender.upper())
+    def get_items_by_category(self, category : str, sort_key: str=None):
+        print(category.upper())
         query = select(
             self.items.c.name,
             self.items.c.base_price,
@@ -85,10 +85,10 @@ class ItemHandler():
             self.sites.c.name.label('site_name'), 
             self.items.c.discount_status
         ).select_from(self.items).join(self.sites) \
-        .where(
-            self.items.c.gender == f"{gender.upper()}" 
-        ).where(
-            self.items.c.discount_status == "ACTIVE")
+        .where(self.items.c.discount_status == "ACTIVE")
+
+        if category != "all":
+            query = query.where(self.items.c.gender == f"{category.upper()}")
         
         if sort_key == "price_l_h":
             query = query.order_by(self.items.c.promo_price.asc())
@@ -103,7 +103,7 @@ class ItemHandler():
 
         return query_result
     
-    def query_filter_items(self, category: str, filterCriteria:FilterModel):
+    def query_filter_items(self, category: str, filterCriteria:FilterModel, sort_key):
         query = select(
             self.items.c.name,
             self.items.c.base_price,
@@ -136,6 +136,16 @@ class ItemHandler():
             for i in range(len(filterCriteria.ratings)):
                 filterCriteria.ratings[i] = round(filterCriteria.ratings[i])
             query = query.where(self.items.c.rating.in_(filterCriteria.ratings))
+
+        if sort_key == "price_l_h":
+            query = query.order_by(self.items.c.promo_price.asc())
+        elif sort_key == "price_h_l":
+            query = query.order_by(self.items.c.promo_price.desc())
+        elif sort_key == "sort_start-date":
+            query = query.order_by(self.items.c.sale_start.desc())
+        elif sort_key == "sort_rating":
+            query = query.order_by(self.items.c.rating.desc())
+        
         print(str(query.compile()))
         print("Parameteres", query.compile().params)
         return self.connection.execute(query)

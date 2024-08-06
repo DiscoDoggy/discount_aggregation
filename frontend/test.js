@@ -56,6 +56,7 @@ class ColorBubble extends HTMLElement
 customElements.define("store-item", StoreItem);
 customElements.define("color-bubble", ColorBubble);
 let GLOBAL_current_endpoint = "";
+let GLOBAL_filter_json = "";
 
 async function get_item_data(url, request_body)
 {
@@ -205,8 +206,19 @@ async function fetch_sorted_items(sort_param) {
     url = url + `?sort_key=${sort_param}`;
     console.log(`URL: ${url}`);
     GLOBAL_current_endpoint = url;
+    console.log(`Current endpoint: ${GLOBAL_current_endpoint}`)
     
-    sorted_items_json = await get_item_data(url, null);
+    var sorted_items_json = null;
+
+    if(GLOBAL_current_endpoint.includes("filter"))
+    {
+        sorted_items_json = await get_item_data(url, GLOBAL_filter_json); 
+    }
+    else
+    {
+        sorted_items_json = await get_item_data(url, null);
+    }
+    
     remove_items_from_page();
     write_items_to_page(sorted_items_json);
 
@@ -395,7 +407,7 @@ async function handle_filtering (
         }
     }
 
-    const request_params = {
+    GLOBAL_filter_json = {
         method:"POST",
         body: JSON.stringify({
             min_price: min_price,
@@ -409,27 +421,39 @@ async function handle_filtering (
         }
     }
 
-    json_items = await get_item_data("http://127.0.0.1:8000/items/men/filter", request_params);
+    var url = GLOBAL_current_endpoint;
+    query_symb_index = url.indexOf("?");
+
+    if (query_symb_index != -1) {
+        url = url.substring(0,query_symb_index);
+    }
+
+    url = url + "/filter";
+    GLOBAL_current_endpoint = url;
+    console.log(`Current endpoint: ${GLOBAL_current_endpoint}`)
+
+    json_items = await get_item_data(url, GLOBAL_filter_json);
     remove_items_from_page();
     write_items_to_page(json_items);
    
 }
 
-async function main() 
+async function main(api_url) 
 {
-    var url = "http://127.0.0.1:8000/items/men";
+    // var url = "http://127.0.0.1:8000/items/men";
+    var url = api_url;
     GLOBAL_current_endpoint = url;
+    console.log(`Current endpoint: ${GLOBAL_current_endpoint}`)
     json_items = await get_item_data(url, null);
     
     var size_and_color_set = write_items_to_page(json_items);
-    console.log(size_and_color_set);
     add_sizes_filters(size_and_color_set[0]);
     add_color_filters(size_and_color_set[1]);
 
     init_events();
 }
 
-main();
+// main();
 
 
 
