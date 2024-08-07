@@ -31,6 +31,17 @@ def get_all_items(sort_key: str | None=None):
 
     return items_list
 
+@app.get("/items/search", response_model=list[Item])
+def get_search_items(search_query : str, sort_key: str | None = None):
+    print("ENTER SEARCH ITEMS")
+    query_results = item_handler.query_search_items(search_query, sort_key)
+    
+    items_list = []
+    for item in query_results:
+        items_list.append(item)
+    
+    return items_list
+
 @app.get("/items/{gender}", response_model = list[Item])
 def get_items_by_gender(gender: str, sort_key: str | None = None):
     # unprocessed... list of elements that sqlalchemy returned
@@ -55,15 +66,7 @@ def get_filter_items(category: str, filterCriteria: FilterModel, sort_key: str |
         items_list.append(item)
 
     return items_list
-@app.get("/items/search", response_model=list[Item])
-def get_search_items(search_query : str, sort_key: str | None = None):
-    query_results = item_handler.query_search_items(search_query, sort_key)
-    
-    items_list = []
-    for item in query_results:
-        items_list.append(item)
-    
-    return items_list
+
     
 
 def print_filter_criteria(filterCriteria):

@@ -57,6 +57,14 @@ customElements.define("store-item", StoreItem);
 customElements.define("color-bubble", ColorBubble);
 
 //basically state variables
+let GLOBAL_state = 
+{
+    category: "",
+    is_sorting_active: false,
+    is_searching_active: false,
+    is_filtering_active: false,
+
+}
 let GLOBAL_current_endpoint = "";
 let GLOBAL_filter_json = "";
 
@@ -199,6 +207,7 @@ function remove_items_from_page() {
 async function fetch_sorted_items(sort_param) {
     console.log("SORTING BUTTON CLICKED");
     var url = GLOBAL_current_endpoint;
+    
     query_symb_index = url.indexOf("?");
     
     if (query_symb_index != -1) {
@@ -324,6 +333,23 @@ function init_events()
         {
             alert("All default filters are currently active");
         }
+
+    });
+
+    var search_button = document.getElementById("search-button");
+    var search_bar = document.getElementById("search-bar");
+
+    search_button.addEventListener("click", async ()=>{
+        var search_query = search_bar.value;
+        var query_symb_index = GLOBAL_current_endpoint.indexOf("?");
+        if (query_symb_index != -1) {
+            GLOBAL_current_endpoint = GLOBAL_current_endpoint.substring(0,query_symb_index);
+        }
+    
+        GLOBAL_current_endpoint =  "http://127.0.0.1:8000/items/search" + `?search_query=${search_query}`;
+        var json_items = await get_item_data(GLOBAL_current_endpoint, null);
+        remove_items_from_page();
+        write_items_to_page(json_items);
 
     });
 }
@@ -479,7 +505,6 @@ async function handle_filtering (
 
 async function main(api_url) 
 {
-    // var url = "http://127.0.0.1:8000/items/men";
     var url = api_url;
     GLOBAL_current_endpoint = url;
     console.log(`Current endpoint: ${GLOBAL_current_endpoint}`)
