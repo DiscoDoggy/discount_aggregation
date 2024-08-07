@@ -57,7 +57,14 @@ def get_filter_items(category: str, filterCriteria: FilterModel, sort_key: str |
     return items_list
 @app.get("/items/search", response_model=list[Item])
 def get_search_items(search_query : str, sort_key: str | None = None):
-    pass
+    query_results = item_handler.query_search_items(search_query, sort_key)
+    
+    items_list = []
+    for item in query_results:
+        items_list.append(item)
+    
+    return items_list
+    
 
 def print_filter_criteria(filterCriteria):
     print(f"Min_price: {filterCriteria.min_price}")

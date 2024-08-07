@@ -148,7 +148,7 @@ class ItemHandler():
         print("Parameteres", query.compile().params)
         return self.connection.execute(query)
 
-    def query_search_items(self, category: str, search_query: str, sort_key):
+    def query_search_items(self, search_query: str, sort_key):
         tsvector_stmt = func.to_tsvector('english', 
                                          self.items.c.name + ' ' + 
                                          self.items.c.gender + ' ' + 
@@ -171,8 +171,17 @@ class ItemHandler():
             self.items.c.discount_status
         ).select_from(self.items).join(self.sites)
 
-        query = query.where(self.c.items.discount_status == "ACTIVE")
+        query = query.where(self.items.c.discount_status == "ACTIVE")
         query = query.where(tsvector_stmt.op('@@')(tsquery_stmt))
+
+        if sort_key == "price_l_h":
+            query = query.order_by(self.items.c.promo_price.asc())
+        elif sort_key == "price_h_l":
+            query = query.order_by(self.items.c.promo_price.desc())
+        elif sort_key == "sort_start-date":
+            query = query.order_by(self.items.c.sale_start.desc())
+        elif sort_key == "sort_rating":
+            query = query.order_by(self.items.c.rating.desc())
 
         print(str(query.compile()))
         print("Parameteres", query.compile().params)
@@ -180,21 +189,8 @@ class ItemHandler():
         return self.connection.execute(query)
 # def main():
 #     item_handler = ItemHandler()
-#     category = "MEN"
-#     size_list = ["L"]
-#     filters = FilterModel(
-#         min_price=30.0,
-#         max_price = 40.0,
-#         sizes=size_list,
-#         colors=["RED", "BLUE", "GREY"],
-#         ratings = [4,5]
-#     )
-#     print("hello world")
-#     results = item_handler.get_filter_items_db(category, filters)
-#     count = 0
+#     search_query = "blue women peanut shirt"
+#     results = item_handler.query_search_items(search_query, sort_key=None)
 #     for row in results.mappings():
-#         if count == 5:
-#             break
-#         count+= 1
 #         print(row)
 # main()
