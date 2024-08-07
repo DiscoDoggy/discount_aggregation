@@ -1,11 +1,9 @@
-from sqlalchemy import create_engine, MetaData, Table, insert, update, select
+from sqlalchemy import create_engine, MetaData, Table, select, func
+from sqlalchemy.dialects.postgresql import TSVECTOR
 import os
 from dotenv import load_dotenv
 from pathlib import Path
-from sqlalchemy.orm import aliased
 from filterModel import FilterModel
-from sqlalchemy import null
-# from sqlalchemy import select_from
 
 class ItemHandler():
     def __init__(self):
@@ -149,7 +147,37 @@ class ItemHandler():
         print(str(query.compile()))
         print("Parameteres", query.compile().params)
         return self.connection.execute(query)
-    
+
+    def query_search_items(self, category: str, search_query: str, sort_key):
+        tsvector_stmt = func.to_tsvector('english', 
+                                         self.items.c.name + ' ' + 
+                                         self.items.c.gender + ' ' + 
+                                         func.array_to_string(self.items.c.colors, ' '))
+        tsquery_stmt = func.plainto_tsquery('english', search_query)
+
+        query = select(
+            self.items.c.name,
+            self.items.c.base_price,
+            self.items.c.promo_price,
+            self.items.c.gender,
+            self.items.c.colors,
+            self.items.c.sizes,
+            self.items.c.rating,
+            self.items.c.num_ratings,
+            self.items.c.sale_start,
+            self.items.c.image_links,
+            self.items.c.link,
+            self.sites.c.name.label('site_name'), 
+            self.items.c.discount_status
+        ).select_from(self.items).join(self.sites)
+
+        query = query.where(self.c.items.discount_status == "ACTIVE")
+        query = query.where(tsvector_stmt.op('@@')(tsquery_stmt))
+
+        print(str(query.compile()))
+        print("Parameteres", query.compile().params)
+
+        return self.connection.execute(query)
 # def main():
 #     item_handler = ItemHandler()
 #     category = "MEN"

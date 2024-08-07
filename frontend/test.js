@@ -492,7 +492,5 @@ async function main(api_url)
     init_events();
 }
 
-// main();
-
 
 
