@@ -74,6 +74,15 @@ let GLOBAL_current_endpoint = "";
 let GLOBAL_filter_json = "";
 let GLOBAL_max_items_per_page = 50;
 
+function update_offset(url, new_offset)
+{
+    const url_object = new URL(url);
+    url_object.searchParams.set("offset", new_offset);
+    const updated_url = url_object.toString();
+
+    return updated_url;
+}
+
 async function get_item_data(url, request_body)
 {
     console.log("entered get_item_data");
@@ -310,7 +319,7 @@ function init_events()
 
     const default_filters_button = document.getElementById("default-filters-button");
     default_filters_button.addEventListener("click", async ()=>{
-        var index = GLOBAL_current_endpoint.search("/filter");
+        var index = GLOBAL_current_endpoint.indexOf("/filter");
         if(index != -1)
         {
             GLOBAL_current_endpoint = GLOBAL_current_endpoint.substring(0, index);
@@ -515,22 +524,40 @@ async function handle_filtering (
 //this needs to happen when a category, search, filter, or sort happens
 function create_pagination_element(max_total_items)
 {
-    var pagination_list = document.getElementsByClassName("pagination");
+    let pagination_list = document.getElementsByClassName("pagination");
     pagination_list = pagination_list[0];
 
-    var previous_page = document.createElement("li");
+    let previous_page = document.createElement("li");
     previous_page.className = "page-item";
 
     num_pages = Math.ceil(max_total_items / GLOBAL_max_items_per_page);
     for(let i = 0; i < num_pages; i++)
     {
-        var page_item = document.createElement("li");
+        let page_item = document.createElement("li");
         page_item.className = "page-item";
 
-        var page_link = document.createElement("a");
+        let page_link = document.createElement("a");
         page_link.textContent = i + 1;
         page_link.className = "page-link";
-        page_link.href = "#placeholder"
+        page_link.addEventListener("click", async ()=>{
+            GLOBAL_current_endpoint = update_offset(GLOBAL_current_endpoint, new_offset= i * GLOBAL_max_items_per_page)
+            
+            let json_items = null;
+            if(GLOBAL_current_endpoint.includes("/filter"))
+            {
+                console.log("enters filtering endpoint");
+                json_items = await get_item_data(GLOBAL_current_endpoint, GLOBAL_filter_json);
+            }
+
+            else
+            {
+                json_items = await get_item_data(GLOBAL_current_endpoint, null);
+            }
+
+            remove_items_from_page();
+            write_items_to_page(json_items);
+                
+        });
 
         page_item.appendChild(page_link);
         pagination_list.appendChild(page_item);
@@ -546,10 +573,13 @@ async function main(api_url)
     json_items = await get_item_data(GLOBAL_current_endpoint, null);
     
     var size_and_color_set = write_items_to_page(json_items);
+    let total_items = json_items[0].num_total_items;
     add_sizes_filters(size_and_color_set[0]);
     add_color_filters(size_and_color_set[1]);
 
     init_events();
+    create_pagination_element(total_items);
+    console.log(`total_items: ${total_items}`);
 }
 
 
