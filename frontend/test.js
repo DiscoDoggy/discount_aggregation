@@ -213,26 +213,30 @@ async function fetch_sorted_items(sort_param) {
     console.log("SORTING BUTTON CLICKED");
     var url = GLOBAL_current_endpoint;
     
-    query_symb_index = url.indexOf("?");
-    
-    if (query_symb_index != -1) {
-        url = url.substring(0,query_symb_index);
-    }
 
-    url = url + `?sort_key=${sort_param}`;
-    console.log(`URL: ${url}`);
-    GLOBAL_current_endpoint = url;
-    console.log(`Current endpoint: ${GLOBAL_current_endpoint}`)
+    //lets make the assumption that sort_param will always be at the end of query parameters
+    // ?limit=w&offset=x&search_query=y&sort_key=z
+    let sort_query_exist_index = GLOBAL_current_endpoint.indexOf("sort_key");
+    if(sort_query_exist_index == -1)
+    {
+        GLOBAL_current_endpoint = GLOBAL_current_endpoint + `&sort_key=${sort_param}`
+    } 
+    else
+    {
+        
+        GLOBAL_current_endpoint = GLOBAL_current_endpoint.substring(0, sort_query_exist_index);
+        GLOBAL_current_endpoint = GLOBAL_current_endpoint + `&sort_key=${sort_param}`;
+    }
     
-    var sorted_items_json = null;
+    let sorted_items_json = null;
 
     if(GLOBAL_current_endpoint.includes("filter"))
     {
-        sorted_items_json = await get_item_data(url, GLOBAL_filter_json); 
+        sorted_items_json = await get_item_data(GLOBAL_current_endpoint, GLOBAL_filter_json); 
     }
     else
     {
-        sorted_items_json = await get_item_data(url, null);
+        sorted_items_json = await get_item_data(GLOBAL_current_endpoint, null);
     }
     
     remove_items_from_page();
@@ -351,7 +355,9 @@ function init_events()
             GLOBAL_current_endpoint = GLOBAL_current_endpoint.substring(0,query_symb_index);
         }
     
-        GLOBAL_current_endpoint =  "http://127.0.0.1:8000/items/search" + `?search_query=${search_query}`;
+        GLOBAL_current_endpoint =  `http://127.0.0.1:8000/items/search?limit=${GLOBAL_max_items_per_page}&offset=0` 
+        + `&search_query=${search_query}`;
+
         var json_items = await get_item_data(GLOBAL_current_endpoint, null);
         remove_items_from_page();
         write_items_to_page(json_items);
@@ -491,18 +497,16 @@ async function handle_filtering (
         }
     }
 
-    var url = GLOBAL_current_endpoint;
-    query_symb_index = url.indexOf("?");
+    let query_symb_index = GLOBAL_current_endpoint.indexOf("?");
 
     if (query_symb_index != -1) {
-        url = url.substring(0,query_symb_index);
+        GLOBAL_current_endpoint = GLOBAL_current_endpoint.substring(0,query_symb_index);
     }
 
-    url = url + "/filter";
-    GLOBAL_current_endpoint = url;
+    GLOBAL_current_endpoint = GLOBAL_current_endpoint + `/filter?limit=${GLOBAL_max_items_per_page}&offset=0`;
     console.log(`Current endpoint: ${GLOBAL_current_endpoint}`)
 
-    json_items = await get_item_data(url, GLOBAL_filter_json);
+    json_items = await get_item_data(GLOBAL_current_endpoint, GLOBAL_filter_json);
     remove_items_from_page();
     write_items_to_page(json_items);
    
@@ -516,8 +520,6 @@ function create_pagination_element(max_total_items)
 
     var previous_page = document.createElement("li");
     previous_page.className = "page-item";
-    var previous_page_link = 
-
 
     num_pages = Math.ceil(max_total_items / GLOBAL_max_items_per_page);
     for(let i = 0; i < num_pages; i++)
@@ -539,18 +541,13 @@ function create_pagination_element(max_total_items)
 
 async function main(api_url) 
 {
-
-    create_pagination_element(200);
-    var url = api_url;
-    GLOBAL_current_endpoint = url;
+    GLOBAL_current_endpoint = api_url;
     console.log(`Current endpoint: ${GLOBAL_current_endpoint}`)
-    json_items = await get_item_data(url, null);
+    json_items = await get_item_data(GLOBAL_current_endpoint, null);
     
     var size_and_color_set = write_items_to_page(json_items);
     add_sizes_filters(size_and_color_set[0]);
     add_color_filters(size_and_color_set[1]);
-
-    create_pagination_element(200);
 
     init_events();
 }

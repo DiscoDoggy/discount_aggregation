@@ -46,9 +46,9 @@ def get_search_items(limit: int, offset: int, search_query : str, sort_key: str 
 def get_items_by_gender(limit: int, offset: int, gender: str, sort_key: str | None = None):
     # unprocessed... list of elements that sqlalchemy returned
     if sort_key != None:
-        unprocessed_items = item_handler.get_items_by_category(limit, offset, gender, sort_key)
+        unprocessed_items = item_handler.get_items_by_category(limit=limit, offset=offset, category=gender, sort_key=sort_key)
     else:
-        unprocessed_items = item_handler.get_items_by_category(gender)
+        unprocessed_items = item_handler.get_items_by_category(limit=limit, offset=offset, category=gender)
     
     items_list = []
     for item in unprocessed_items:

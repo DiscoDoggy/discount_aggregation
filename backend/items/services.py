@@ -41,7 +41,8 @@ class ItemHandler():
         query = query.where(self.items.c.discount_status == "ACTIVE")
 
         if sort_key != None:
-            query = query.self.append_sort_criteria(query, sort_key)
+            query = self.append_sort_criteria(query, sort_key)
+
 
         query = query.offset(offset)
         query = query.limit(limit)
@@ -59,7 +60,7 @@ class ItemHandler():
             query = query.where(self.items.c.gender == f"{category.upper()}")
         
         if sort_key != None:
-            query = query.append_sort_criteria(query, sort_key)
+            query = self.append_sort_criteria(query, sort_key)
 
         query = query.offset(offset)
         query = query.limit(limit)
@@ -88,7 +89,7 @@ class ItemHandler():
                 filterCriteria.ratings[i] = round(filterCriteria.ratings[i])
             query = query.where(self.items.c.rating.in_(filterCriteria.ratings))
 
-        query = query.self.append_sort_criteria(query, sort_key)
+        query = self.append_sort_criteria(query, sort_key)
 
         query = query.offset(offset)
         query = query.limit(limit)
@@ -109,7 +110,7 @@ class ItemHandler():
         query = query.where(self.items.c.discount_status == "ACTIVE")
         query = query.where(tsvector_stmt.op('@@')(tsquery_stmt))
 
-        query = query.self.append_sort_criteria(query, sort_key)
+        query = self.append_sort_criteria(query, sort_key)
 
         query = query.offset(offset)
         query = query.limit(limit)
