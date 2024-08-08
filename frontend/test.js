@@ -553,14 +553,18 @@ function create_pagination_element(max_total_items)
             {
                 json_items = await get_item_data(GLOBAL_current_endpoint, null);
             }
-
+            
+            scroll(0,0);   
             remove_items_from_page();
             write_items_to_page(json_items);
-                
+                         
         });
 
         page_item.appendChild(page_link);
         pagination_list.appendChild(page_item);
+        let test_element = document.createElement('h1');
+        test_element.textContent = "SCARY BERRY";
+        document.body.appendChild(test_element);        
     }
 
 }
@@ -579,6 +583,7 @@ async function main(api_url)
 
     init_events();
     create_pagination_element(total_items);
+
     console.log(`total_items: ${total_items}`);
 }
 
