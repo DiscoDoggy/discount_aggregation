@@ -35,88 +35,41 @@ class ItemHandler():
 
         load_dotenv(dotenv_path=env_path)
 
-    def get_all_items(self, sort_key:str = None):
-        query = select(
-            self.items.c.name,
-            self.items.c.base_price,
-            self.items.c.promo_price,
-            self.items.c.gender,
-            self.items.c.colors,
-            self.items.c.sizes,
-            self.items.c.rating,
-            self.items.c.num_ratings,
-            self.items.c.sale_start,
-            self.items.c.image_links,
-            self.items.c.link,
-            self.sites.c.name.label('site_name') 
-        ).select_from(self.items).join(self.sites).where(
-            self.items.c.discount_status == "ACTIVE"
-        )
+    def get_all_items(self, limit: int, offset: int, sort_key:str = None):
+        query = self.create_select_and_from()
 
-        if sort_key == "price_l_h":
-            query = query.order_by(self.items.c.promo_price.asc())
-        elif sort_key == "price_h_l":
-            query = query.order_by(self.items.c.promo_price.desc())
-        elif sort_key == "sort_start-date":
-            query = query.order_by(self.items.c.sale_start.desc())
-        elif sort_key == "sort_rating":
-            query = query.order_by(self.items.c.rating.desc())
+        query = query.where(self.items.c.discount_status == "ACTIVE")
+
+        if sort_key != None:
+            query = query.self.append_sort_criteria(query, sort_key)
+
+        query = query.offset(offset)
+        query = query.limit(limit)
 
         query_result = self.connection.execute(query)
 
         return query_result
     
-    def get_items_by_category(self, category : str, sort_key: str=None):
-        print(category.upper())
-        query = select(
-            self.items.c.name,
-            self.items.c.base_price,
-            self.items.c.promo_price,
-            self.items.c.gender,
-            self.items.c.colors,
-            self.items.c.sizes,
-            self.items.c.rating,
-            self.items.c.num_ratings,
-            self.items.c.sale_start,
-            self.items.c.image_links,
-            self.items.c.link,
-            self.sites.c.name.label('site_name'), 
-            self.items.c.discount_status
-        ).select_from(self.items).join(self.sites) \
-        .where(self.items.c.discount_status == "ACTIVE")
+    def get_items_by_category(self, limit: int, offset: int, category : str, sort_key: str=None):
+        query = self.create_select_and_from()
+
+        query = query.where(self.items.c.discount_status == "ACTIVE")
 
         if category != "all":
             query = query.where(self.items.c.gender == f"{category.upper()}")
         
-        if sort_key == "price_l_h":
-            query = query.order_by(self.items.c.promo_price.asc())
-        elif sort_key == "price_h_l":
-            query = query.order_by(self.items.c.promo_price.desc())
-        elif sort_key == "sort_start-date":
-            query = query.order_by(self.items.c.sale_start.desc())
-        elif sort_key == "sort_rating":
-            query = query.order_by(self.items.c.rating.desc())
+        if sort_key != None:
+            query = query.append_sort_criteria(query, sort_key)
+
+        query = query.offset(offset)
+        query = query.limit(limit)
 
         query_result = self.connection.execute(query)
 
         return query_result
     
-    def query_filter_items(self, category: str, filterCriteria:FilterModel, sort_key):
-        query = select(
-            self.items.c.name,
-            self.items.c.base_price,
-            self.items.c.promo_price,
-            self.items.c.gender,
-            self.items.c.colors,
-            self.items.c.sizes,
-            self.items.c.rating,
-            self.items.c.num_ratings,
-            self.items.c.sale_start,
-            self.items.c.image_links,
-            self.items.c.link,
-            self.sites.c.name.label('site_name'), 
-            self.items.c.discount_status
-        ).select_from(self.items).join(self.sites)
+    def query_filter_items(self, limit: int, offset: int, category: str, filterCriteria:FilterModel, sort_key):
+        query = self.create_select_and_from()
 
         query = query.where(self.items.c.discount_status == "ACTIVE")
         
@@ -135,6 +88,38 @@ class ItemHandler():
                 filterCriteria.ratings[i] = round(filterCriteria.ratings[i])
             query = query.where(self.items.c.rating.in_(filterCriteria.ratings))
 
+        query = query.self.append_sort_criteria(query, sort_key)
+
+        query = query.offset(offset)
+        query = query.limit(limit)
+        
+        print(str(query.compile()))
+        print("Parameteres", query.compile().params)
+        return self.connection.execute(query)
+
+    def query_search_items(self, limit: int, offset: int, search_query: str, sort_key):
+        tsvector_stmt = func.to_tsvector('english', 
+                                         self.items.c.name + ' ' + 
+                                         self.items.c.gender + ' ' + 
+                                         func.array_to_string(self.items.c.colors, ' '))
+        tsquery_stmt = func.plainto_tsquery('english', search_query)
+
+        query = self.create_select_and_from()
+
+        query = query.where(self.items.c.discount_status == "ACTIVE")
+        query = query.where(tsvector_stmt.op('@@')(tsquery_stmt))
+
+        query = query.self.append_sort_criteria(query, sort_key)
+
+        query = query.offset(offset)
+        query = query.limit(limit)
+
+        print(str(query.compile()))
+        print("Parameteres", query.compile().params)
+
+        return self.connection.execute(query)
+    
+    def append_sort_criteria(self, query, sort_key):
         if sort_key == "price_l_h":
             query = query.order_by(self.items.c.promo_price.asc())
         elif sort_key == "price_h_l":
@@ -144,18 +129,10 @@ class ItemHandler():
         elif sort_key == "sort_rating":
             query = query.order_by(self.items.c.rating.desc())
         
-        print(str(query.compile()))
-        print("Parameteres", query.compile().params)
-        return self.connection.execute(query)
+        return query
 
-    def query_search_items(self, search_query: str, sort_key):
-        tsvector_stmt = func.to_tsvector('english', 
-                                         self.items.c.name + ' ' + 
-                                         self.items.c.gender + ' ' + 
-                                         func.array_to_string(self.items.c.colors, ' '))
-        tsquery_stmt = func.plainto_tsquery('english', search_query)
-
-        query = select(
+    def create_select_and_from(self):
+        return select(
             self.items.c.name,
             self.items.c.base_price,
             self.items.c.promo_price,
@@ -168,25 +145,10 @@ class ItemHandler():
             self.items.c.image_links,
             self.items.c.link,
             self.sites.c.name.label('site_name'), 
-            self.items.c.discount_status
+            self.items.c.discount_status,
+            func.count(self.items.c.id).over().label("num_total_items")
         ).select_from(self.items).join(self.sites)
-
-        query = query.where(self.items.c.discount_status == "ACTIVE")
-        query = query.where(tsvector_stmt.op('@@')(tsquery_stmt))
-
-        if sort_key == "price_l_h":
-            query = query.order_by(self.items.c.promo_price.asc())
-        elif sort_key == "price_h_l":
-            query = query.order_by(self.items.c.promo_price.desc())
-        elif sort_key == "sort_start-date":
-            query = query.order_by(self.items.c.sale_start.desc())
-        elif sort_key == "sort_rating":
-            query = query.order_by(self.items.c.rating.desc())
-
-        print(str(query.compile()))
-        print("Parameteres", query.compile().params)
-
-        return self.connection.execute(query)
+        
 # def main():
 #     item_handler = ItemHandler()
 #     search_query = "blue women peanut shirt"

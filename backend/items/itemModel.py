@@ -16,3 +16,4 @@ class Item(BaseModel):
     link : str
     site_name : str | None=None
     discount_status : str | None=None
+    num_total_items : int

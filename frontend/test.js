@@ -56,6 +56,11 @@ class ColorBubble extends HTMLElement
 customElements.define("store-item", StoreItem);
 customElements.define("color-bubble", ColorBubble);
 
+class PaginationState
+{
+
+}
+
 //basically state variables
 let GLOBAL_state = 
 {
@@ -63,19 +68,19 @@ let GLOBAL_state =
     is_sorting_active: false,
     is_searching_active: false,
     is_filtering_active: false,
-
 }
+
 let GLOBAL_current_endpoint = "";
 let GLOBAL_filter_json = "";
+let GLOBAL_max_items_per_page = 50;
 
 async function get_item_data(url, request_body)
 {
     console.log("entered get_item_data");
     let response_body = null;
     var response = null;
+
     try {
-
-
         if (request_body === null)
         {
             response = await fetch(url);
@@ -503,8 +508,39 @@ async function handle_filtering (
    
 }
 
+//this needs to happen when a category, search, filter, or sort happens
+function create_pagination_element(max_total_items)
+{
+    var pagination_list = document.getElementsByClassName("pagination");
+    pagination_list = pagination_list[0];
+
+    var previous_page = document.createElement("li");
+    previous_page.className = "page-item";
+    var previous_page_link = 
+
+
+    num_pages = Math.ceil(max_total_items / GLOBAL_max_items_per_page);
+    for(let i = 0; i < num_pages; i++)
+    {
+        var page_item = document.createElement("li");
+        page_item.className = "page-item";
+
+        var page_link = document.createElement("a");
+        page_link.textContent = i + 1;
+        page_link.className = "page-link";
+        page_link.href = "#placeholder"
+
+        page_item.appendChild(page_link);
+        pagination_list.appendChild(page_item);
+    }
+
+}
+
+
 async function main(api_url) 
 {
+
+    create_pagination_element(200);
     var url = api_url;
     GLOBAL_current_endpoint = url;
     console.log(`Current endpoint: ${GLOBAL_current_endpoint}`)
@@ -513,6 +549,8 @@ async function main(api_url)
     var size_and_color_set = write_items_to_page(json_items);
     add_sizes_filters(size_and_color_set[0]);
     add_color_filters(size_and_color_set[1]);
+
+    create_pagination_element(200);
 
     init_events();
 }
