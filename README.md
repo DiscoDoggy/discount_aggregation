@@ -25,12 +25,28 @@ PostgreSQL database.
 Not all extracted data should be pushed to the Postgres Database. For example, if there are required fields missing from a clothing  item, an import error should be thrown and that item should not end up in the database. Another case
 is if the item already exists in the database as a result of a past extraction. There should not be duplicates in the database. There are more cases of what should and should not make it into the final database but the recently listed is sufficient here. 
 
-### Frontend
-For the backend, raw javascript, html, and css were chosen. Although this is probably not optimal, I am using this project as a way to learn more about what happens under the hood for various frameworks which is why the frontend stack is pretty void of large 
-frameworks and libraries. Roughly what is had right now is what is shown in the image but all the data is pulled from the database which is populated by the data pipeline and retrieved through a custom API I built 
+The ingestion also updates items in the DB whose data might have been updated since the last extraction. 
 
-![image](https://github.com/DiscoDoggy/discount_aggregation/assets/110149934/d105d2a9-61e1-4e6e-a270-2fde04e2e413)
+The database connection to MongoDB is done with PyMongo and the database connection to Postgres utilizes SQLAlchemy.
+
+### Frontend
+The frontend is written in raw HTML, some Bootstrap components, and raw javascript. Using this "lower" level approach to frontend web development as opposed to using established frameworks like React was done mostly for learning and developing stronger skills with javascript and the overall fundamentals of web development.  
+
+![image](https://github.com/user-attachments/assets/ba223efb-968d-440d-832b-fe6507200eaa)
+![image](https://github.com/user-attachments/assets/2f27e9e2-eb97-4ddd-8459-422a9598713e)
+
 
 
 ### Backend 
-The backend is written in fastAPI
+The backend is written in FastAPI and in order to connect to the database, we again use SQLAlchemy. 
+
+Thus far, the backend is pretty simple. Most of the requests that need to be made are data reads (GET requests). The different GET operations support the basic needs of clothing websites. Users may want to filter by size, price, colors, and rating. Users may want to sort the selection of items or search for different types of items via a search bar. All these operations are supported. 
+
+#### Filtering
+To implement filtering, instead of passing the different pieces of filtering information through query parameters, I decided to use a JSON request payload. The JSON post request felt easier to pass in long lists of colors or sizes that a user may want to include within their filter query. All of the sizes and colors can be stored in a list each but if these were to be fed into a query parameter, it would be much more difficult to parse and process.
+
+#### Sorting
+Sorting is implemented through query parameter where some sort of "sort_key" is passed and then parsed in the backend to determine what SQL ORDERBY function should be performed.
+
+#### Searching
+In order to implement searching, we used PostgreSQL full text search support which involved crafting vectors and search query objects to pass to postgres to query in the database. 
