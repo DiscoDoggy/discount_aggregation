@@ -241,7 +241,7 @@ async function fetch_sorted_items(sort_param) {
 
     //lets make the assumption that sort_param will always be at the end of query parameters
     // ?limit=w&offset=x&search_query=y&sort_key=z
-    let sort_query_exist_index = GLOBAL_current_endpoint.indexOf("sort_key");
+    let sort_query_exist_index = GLOBAL_current_endpoint.indexOf("&sort_key");
     if(sort_query_exist_index == -1)
     {
         GLOBAL_current_endpoint = GLOBAL_current_endpoint + `&sort_key=${sort_param}`
@@ -537,10 +537,16 @@ async function handle_filtering (
         }
     }
 
-    let query_symb_index = GLOBAL_current_endpoint.indexOf("?");
+    let query_symb_index = GLOBAL_current_endpoint.indexOf("/filter");
 
-    if (query_symb_index != -1) {
+    if(query_symb_index != -1)
+    {
         GLOBAL_current_endpoint = GLOBAL_current_endpoint.substring(0,query_symb_index);
+    }
+
+    else if (GLOBAL_current_endpoint.indexOf("?") != -1)
+    {
+        GLOBAL_current_endpoint = GLOBAL_current_endpoint.substring(0,GLOBAL_current_endpoint.indexOf("?"));
     }
 
     GLOBAL_current_endpoint = GLOBAL_current_endpoint + `/filter?limit=${GLOBAL_max_items_per_page}&offset=0`;
@@ -553,7 +559,6 @@ async function handle_filtering (
     {
             let total_items = json_items[0].num_total_items;
             create_pagination_element(total_items);
-
     }
 
    
@@ -562,6 +567,9 @@ async function handle_filtering (
 //this needs to happen when a category, search, filter, or sort happens
 function create_pagination_element(max_total_items)
 {
+
+    console.log(`max_total items: ${max_total_items}`);
+
     let pagination_list = document.getElementsByClassName("pagination");
     pagination_list = pagination_list[0];
 
@@ -580,7 +588,8 @@ function create_pagination_element(max_total_items)
         let page_link = document.createElement("a");
         page_link.textContent = i + 1;
         page_link.className = "page-link";
-        page_link.addEventListener("click", async ()=>{
+
+        page_link.addEventListener("click", async ()=> {
             GLOBAL_current_endpoint = update_offset(GLOBAL_current_endpoint, new_offset= i * GLOBAL_max_items_per_page)
             
             let json_items = null;
@@ -622,7 +631,6 @@ async function main(api_url)
     init_events();
     create_pagination_element(total_items);
 
-    console.log(`total_items: ${total_items}`);
 }
 
 // export {create_pagination_element};
