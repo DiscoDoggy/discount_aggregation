@@ -173,18 +173,30 @@ function write_items_to_page(json_items)
 function add_sizes_filters(unique_sizes)
 {
     console.log("ENTERING ADD_SIZES_FILTERS");
-    var append_location = document.getElementById("sizes-filter-container");
-    var size_html = "";
-    for(const size of unique_sizes)
+    let append_location = document.getElementById("sizes-filter-container");
+    let size_html = "";
+
+    for (const size of unique_sizes)
     {
-        size_html +=
-        `
-        <input type="checkbox" class="size-checkbox" id="${size}" checked>
-        <label for="${size}">${size}</label>
-        `
+        let size_checkbox_container = document.createElement("div");
+
+        let new_checkbox = document.createElement("input");
+        new_checkbox.type = "checkbox";
+        new_checkbox.className = "size-checkbox";
+        new_checkbox.id = `${size}`;
+        new_checkbox.checked = true;
+
+        let new_checkbox_label = document.createElement("label");
+        new_checkbox_label.htmlFor = `${size}`;
+        new_checkbox_label.textContent = `${size}`;
+        new_checkbox_label.className = "checkbox-grid-label";
+
+        new_checkbox_label.appendChild(new_checkbox);
+        size_checkbox_container.appendChild(new_checkbox_label);
+        append_location.appendChild(size_checkbox_container);
     }
 
-    append_location.insertAdjacentHTML("afterend", size_html);
+    // append_location.insertAdjacentHTML("afterend", size_html);
 
     
 }
@@ -193,19 +205,23 @@ function add_color_filters(unique_colors)
 {
     //takes in a set of colors
     console.log("ENTERING ADD_COLOR_FILTERS");
-    var append_location = document.getElementById("color-filter-checkboxes");
+    let append_location = document.getElementById("color-filter-container");
+    
     for(const color of unique_colors)
     {
-        var checkbox = document.createElement("input");
+        let checkbox_div = document.createElement("div");
+
+        let checkbox = document.createElement("input");
         checkbox.type = "checkbox";
         checkbox.className = "color-checkbox";
         checkbox.checked = true;
 
-        var checkbox_label = document.createElement("label");
+        let checkbox_label = document.createElement("label");
         checkbox_label.innerText = `${color}`;
 
-        append_location.appendChild(checkbox);
-        append_location.appendChild(checkbox_label);
+        checkbox_label.appendChild(checkbox);
+        checkbox_div.appendChild(checkbox_label);
+        append_location.appendChild(checkbox_div);
     }
 }
 
@@ -250,6 +266,13 @@ async function fetch_sorted_items(sort_param) {
     
     remove_items_from_page();
     write_items_to_page(sorted_items_json);
+    if(sorted_json_items.length)
+        {
+            let total_items = sorted_items_json_items[0].num_total_items;
+            create_pagination_element(total_items);
+
+        }
+
 
 }
 
@@ -370,6 +393,14 @@ function init_events()
         var json_items = await get_item_data(GLOBAL_current_endpoint, null);
         remove_items_from_page();
         write_items_to_page(json_items);
+        if(json_items.length)
+        {
+            let total_items = json_items[0].num_total_items;
+            create_pagination_element(total_items);
+
+        }
+        
+
 
     });
 }
@@ -518,6 +549,13 @@ async function handle_filtering (
     json_items = await get_item_data(GLOBAL_current_endpoint, GLOBAL_filter_json);
     remove_items_from_page();
     write_items_to_page(json_items);
+    if(json_items.length)
+    {
+            let total_items = json_items[0].num_total_items;
+            create_pagination_element(total_items);
+
+    }
+
    
 }
 
@@ -527,8 +565,11 @@ function create_pagination_element(max_total_items)
     let pagination_list = document.getElementsByClassName("pagination");
     pagination_list = pagination_list[0];
 
-    let previous_page = document.createElement("li");
-    previous_page.className = "page-item";
+    let pagination_children = pagination_list.children;
+    if(pagination_children.length)
+    {
+        pagination_children.replaceChildren();
+    }
 
     num_pages = Math.ceil(max_total_items / GLOBAL_max_items_per_page);
     for(let i = 0; i < num_pages; i++)
@@ -561,10 +602,7 @@ function create_pagination_element(max_total_items)
         });
 
         page_item.appendChild(page_link);
-        pagination_list.appendChild(page_item);
-        let test_element = document.createElement('h1');
-        test_element.textContent = "SCARY BERRY";
-        document.body.appendChild(test_element);        
+        pagination_list.appendChild(page_item);   
     }
 
 }
@@ -587,5 +625,5 @@ async function main(api_url)
     console.log(`total_items: ${total_items}`);
 }
 
-
+// export {create_pagination_element};
 

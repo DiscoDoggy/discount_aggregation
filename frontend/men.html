@@ -48,17 +48,23 @@
                     <input id="max-price-filter-input" type="number" min="0" placeholder="max $" step="any">
                 </div>
         
-                <div id="sizes-filter-container">
-                    <h5>Sizes</h5>
-                    <input type="checkbox" id="any-size-checkbox" checked>
-                        <label>Any</label>
+                <h5>Sizes</h5>
+                <div id="sizes-filter-container" class="filter-checkbox-container">
+                    <div>
+                        <label>
+                            Any
+                            <input type="checkbox" id="any-size-checkbox" checked>
+                        </label>
+                    </div>
                 </div>
         
-                <div id="color-filter-container">
-                    <h5>Colors</h5>
+                <h5>Colors</h5>
+                <div id="color-filter-container" class="filter-checkbox-container">
                     <div id="color-filter-checkboxes">
-                        <input type="checkbox" id="any-color-checkbox">
-                            <label>Any</label>
+                        <label>
+                            Any
+                            <input type="checkbox" id="any-color-checkbox">
+                        </label>
                     </div>
                 </div>
         
@@ -85,7 +91,7 @@
         </div>
 
         <input type="text" id="search-bar" class="form-control" placeholder="Search..." aria-label="Input group example" aria-describedby="basic-addon1">
-        <button id="search-button">Search</button>
+        <button type="button" class="btn btn-primary" id="search-button" >Search</button>
         <!-- sort -->
         <div class="dropdown">
             <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -102,7 +108,6 @@
     <div id="item-grid-container">
     </div>
 
-    <h1>The fall of my sanity</h1>
     <div id="pagination-container">
         <nav aria-label="Page navigation example">
             <ul class="pagination">

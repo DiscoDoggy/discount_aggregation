@@ -12,7 +12,7 @@
     <nav class="nav justify-content-center">
         <ul class="nav justify-content-center">
             <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="#home">Home</a>
+            <a class="nav-link active" aria-current="page" href="index.html">Home</a>
             </li>
             <li class="nav-item">
             <a class="nav-link" href="all_sales.html">All Items</a>
@@ -79,10 +79,13 @@
                 </div>
         
                 <button id="submit-filters-button">Submit Filter Query</button>
+                <button id="default-filters-button">Default</button>
             </div>
         </div>
         </div>
 
+        <input type="text" id="search-bar" class="form-control" placeholder="Search..." aria-label="Input group example" aria-describedby="basic-addon1">
+        <button id="search-button">Search</button>
         <!-- sort -->
         <div class="dropdown">
             <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -98,6 +101,14 @@
     </div>
     <div id="item-grid-container">
     </div>
+
+    <div id="pagination-container">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination">
+            </ul>
+        </nav>
+    </div>
+    
 
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
