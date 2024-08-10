@@ -573,13 +573,18 @@ function create_pagination_element(max_total_items)
     let pagination_list = document.getElementsByClassName("pagination");
     pagination_list = pagination_list[0];
 
+    console.log(pagination_list);
+
     let pagination_children = pagination_list.children;
+    console.log(`Paginatoin children ${pagination_children.length} `);
+
     if(pagination_children.length)
     {
-        pagination_children.replaceChildren();
+        pagination_list.replaceChildren();
     }
 
     num_pages = Math.ceil(max_total_items / GLOBAL_max_items_per_page);
+    console.log(`num pages: ${num_pages}`);
     for(let i = 0; i < num_pages; i++)
     {
         let page_item = document.createElement("li");
