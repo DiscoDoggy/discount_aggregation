@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Body
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi import Response
@@ -37,9 +37,10 @@ def create_account(user_info: CreateUserModel, response:Response):
     response.set_cookie(key="session_id", value=session_token)
 
     return {"message" : "Account created successfully"}
+# @app.post("/user/login")
+# def login(user : dict = Depends(item_handler.authenticate_user)):
+#     pass
     
-
-
 @app.get("/items", response_model = list[Item])
 def get_all_items(limit: int, offset: int, sort_key: str | None=None):
     #unprocessed... list of elements that sqlalchemy returned

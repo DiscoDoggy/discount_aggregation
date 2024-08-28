@@ -4,7 +4,8 @@ import os
 from dotenv import load_dotenv
 from pathlib import Path
 from filterModel import FilterModel
-from fastapi import HTTPException, status
+from fastapi import FastAPI, HTTPException, status, Depends
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 import uuid
 import bcrypt
 import secrets
@@ -170,19 +171,42 @@ class ItemHandler():
                 detail="User already registered with this email."
             )
         else:
-            encrypted_password = password.encode('utf-8')
+            encrypted_password = password.encode()
             salt = bcrypt.gensalt()
             hash = bcrypt.hashpw(encrypted_password, salt)
+
+            hash = hash.decode()
 
             session_token = self.create_new_user(email,hash)
             return session_token
         
-    def login(self, email, password):
-        #query for the password associated with this email
-        #hash password passed by user
-        #compare the password to the password in the db
-        #reject vs authenticate
-        pass
+    # def authenticate_user(self, credentials:HTTPBasicCredentials=Depends(security)):
+    #     #query for the password associated with this email
+    #     #hash password passed by user
+    #     #compare the password to the password in the db
+    #     #reject vs authenticate
+    #     # i guess authorization would be when looking at an endpoint we would pass the cookie token assoicated with our account
+    #     #and if we have the role or privilage to enter then we can enter else errro
+    #     query = select(
+    #         self.users.c.email,
+    #         self.users.c.password,
+    #         self.users.c.session_token,
+    #         self.users.c.session_end
+    #     )
+
+    #     results = self.connection.execute(query)
+    #     if len(results) == 0:
+    #         raise HTTPException(
+    #             status_code=status.HTTP_404_NOT_FOUND,
+    #             details="There is no account associated with this email",
+    #             headers={"WWW-Authenticate" : "Basic"}
+    #         )
+    #     #need to check if the passwords are the same
+    #     # requires me to extract the hash from the stored password
+    #     #use that salt to hash the input password
+    #     #then compare if the hashed passwords are the same
+
+    #     pass
 
     def create_new_user(self, email, hashed_password):
         session_token = secrets.token_hex(32)
