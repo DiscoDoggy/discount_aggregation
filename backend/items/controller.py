@@ -1,8 +1,16 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Body
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from fastapi import Response
+
+from typing import Annotated
+
 import services
 from itemModel import Item
 from filterModel import FilterModel
-from fastapi.middleware.cors import CORSMiddleware
+from userModel import CreateUserModel
+
+
 
 app = FastAPI()
 
@@ -20,6 +28,17 @@ item_handler = services.ItemHandler()
 @app.get("/")
 async def root():
     return {"message" : "hello world, this is my backend"}
+
+#when uesr creates an account they send a request to this backend
+#need to create a createusers end point
+@app.post("/user/create")
+def create_account(user_info: CreateUserModel, response:Response):
+    session_token = item_handler.signup(user_info.email, user_info.password)
+    response.set_cookie(key="session_id", value=session_token)
+
+    return {"message" : "Account created successfully"}
+    
+
 
 @app.get("/items", response_model = list[Item])
 def get_all_items(limit: int, offset: int, sort_key: str | None=None):

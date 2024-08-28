@@ -1,9 +1,14 @@
-from sqlalchemy import create_engine, MetaData, Table, select, func
+from sqlalchemy import create_engine, MetaData, Table, select, func, insert
 from sqlalchemy.dialects.postgresql import TSVECTOR
 import os
 from dotenv import load_dotenv
 from pathlib import Path
 from filterModel import FilterModel
+from fastapi import HTTPException, status
+import uuid
+import bcrypt
+import secrets
+import datetime
 
 class ItemHandler():
     def __init__(self):
@@ -13,6 +18,7 @@ class ItemHandler():
         self.extractions = Table("extractions", self.meta_data, autoload_with=self.engine)
         self.sites = Table("sites", self.meta_data, autoload_with=self.engine)
         self.item_change_records = Table("item_change_records", self.meta_data, autoload_with=self.engine)
+        self.users = Table("users", self.meta_data, autoload_with=self.engine)
 
     def init_connection(self):
         self.load_env()
@@ -149,7 +155,54 @@ class ItemHandler():
             self.items.c.discount_status,
             func.count(self.items.c.id).over().label("num_total_items")
         ).select_from(self.items).join(self.sites)
+
+    def signup(self, email, password):
+        query = select(self.users.c.email).where(self.users.c.email == email)
+        results = self.connection.execute(query)
+        num_results = 0
+
+        for _ in results:
+            num_results += 1
+
+        if num_results != 0:
+            raise HTTPException(
+                status_code = status.HTTP_409_CONFLICT,
+                detail="User already registered with this email."
+            )
+        else:
+            encrypted_password = password.encode('utf-8')
+            salt = bcrypt.gensalt()
+            hash = bcrypt.hashpw(encrypted_password, salt)
+
+            session_token = self.create_new_user(email,hash)
+            return session_token
         
+    def login(self, email, password):
+        #query for the password associated with this email
+        #hash password passed by user
+        #compare the password to the password in the db
+        #reject vs authenticate
+        pass
+
+    def create_new_user(self, email, hashed_password):
+        session_token = secrets.token_hex(32)
+        session_start = datetime.datetime.today()
+        session_end = session_start + datetime.timedelta(days=30)
+
+        formatted_session_start = session_start.strftime('%Y-%m-%d %H:%M:%S')
+        formatted_session_end = session_end.strftime('%Y-%m-%d %H:%M:%S')
+
+        user_id = uuid.uuid4()
+
+        insert_query = (
+            insert(self.users).values(id=user_id, email=email, password=hashed_password, session_token=session_token, session_start=formatted_session_start, session_end=formatted_session_end)
+        )
+        print(str(insert_query.compile()))
+        self.connection.execute(insert_query)
+        self.connection.commit()
+
+        return session_token
+      
 # def main():
 #     item_handler = ItemHandler()
 #     search_query = "blue women peanut shirt"
