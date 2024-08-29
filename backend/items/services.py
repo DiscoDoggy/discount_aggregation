@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, MetaData, Table, select, func, insert
+from sqlalchemy import create_engine, MetaData, Table, select, func, insert, update
 from sqlalchemy.dialects.postgresql import TSVECTOR
 import os
 from dotenv import load_dotenv
@@ -180,38 +180,64 @@ class ItemHandler():
             session_token = self.create_new_user(email,hash)
             return session_token
         
-    # def authenticate_user(self, credentials:HTTPBasicCredentials=Depends(security)):
-    #     #query for the password associated with this email
-    #     #hash password passed by user
-    #     #compare the password to the password in the db
-    #     #reject vs authenticate
-    #     # i guess authorization would be when looking at an endpoint we would pass the cookie token assoicated with our account
-    #     #and if we have the role or privilage to enter then we can enter else errro
-    #     query = select(
-    #         self.users.c.email,
-    #         self.users.c.password,
-    #         self.users.c.session_token,
-    #         self.users.c.session_end
-    #     )
+    def authenticate_user(self, credentials:HTTPBasicCredentials=Depends(security)):
+        query = select(
+            self.users.c.email,
+            self.users.c.password,
+            self.users.c.session_token,
+            self.users.c.session_end
+        ).where(self.users.c.email == credentials.email)
 
-    #     results = self.connection.execute(query)
-    #     if len(results) == 0:
-    #         raise HTTPException(
-    #             status_code=status.HTTP_404_NOT_FOUND,
-    #             details="There is no account associated with this email",
-    #             headers={"WWW-Authenticate" : "Basic"}
-    #         )
-    #     #need to check if the passwords are the same
-    #     # requires me to extract the hash from the stored password
-    #     #use that salt to hash the input password
-    #     #then compare if the hashed passwords are the same
+        results = self.connection.execute(query)
 
-    #     pass
+        if len(results) == 0:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                details="There is no account associated with this email",
+                headers={"WWW-Authenticate" : "Basic"}
+            )
+
+        for row in results:
+            pwd_in_db = row.password
+            session_token = row.session_token
+            session_end = row.session_end
+
+        do_passwords_match = bcrypt.checkpw(credentials.password, pwd_in_db)
+
+        if not do_passwords_match:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                details="Invalid password"
+            )
+        
+        current_time = datetime.now()
+        if session_end <= current_time:
+            new_session_token, new_session_start, new_session_end = self.create_new_session()
+
+            update_session_query = update(self.users) \
+                .where(self.users.c.email == credentials.email) \
+                .values(
+                    session_token=new_session_token,
+                    session_start=new_session_start,
+                    session_end=new_session_end
+                )
+            
+            self.connection.execute(update_session_query)
+            self.connection.commit()
+
+            return new_session_token
+    
+        return session_token
+
+
+
+        
+        
+
+        pass
 
     def create_new_user(self, email, hashed_password):
-        session_token = secrets.token_hex(32)
-        session_start = datetime.datetime.today()
-        session_end = session_start + datetime.timedelta(days=30)
+        session_token, session_start, session_end = self.create_new_session()
 
         formatted_session_start = session_start.strftime('%Y-%m-%d %H:%M:%S')
         formatted_session_end = session_end.strftime('%Y-%m-%d %H:%M:%S')
@@ -226,6 +252,14 @@ class ItemHandler():
         self.connection.commit()
 
         return session_token
+    
+    def create_new_session():
+        session_token = secrets.token_hex(32)
+        session_start = datetime.datetime.today()
+        session_end = session_start + datetime.timedelta(days=30)
+
+        return session_token, session_start, session_end
+        
       
 # def main():
 #     item_handler = ItemHandler()
