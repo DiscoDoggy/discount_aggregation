@@ -39,8 +39,8 @@ def create_account(user_info: CreateUserModel, response:Response):
     return {"message" : "Account created successfully"}
 
 @app.post("/user/login")
-def login(user : dict = Depends(item_handler.authenticate_user)):
-    pass
+def login(session_token : str = Depends(item_handler.authenticate_user)):
+    return {"session_id" : session_token}
     
 @app.get("/items", response_model = list[Item])
 def get_all_items(limit: int, offset: int, sort_key: str | None=None):
