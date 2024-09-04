@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi import Response
@@ -39,8 +39,13 @@ def create_account(user_info: CreateUserModel, response:Response):
     return {"message" : "Account created successfully"}
 
 @app.post("/user/login")
-def login(session_token : str = Depends(item_handler.authenticate_user)):
+def login(session_token : str = Depends(item_handler.log_user_in)):
     return {"session_id" : session_token}
+
+@app.post("/user/logout")
+def logout(request:Request):
+    item_handler.log_user_out(request)
+    pass
     
 @app.get("/items", response_model = list[Item])
 def get_all_items(limit: int, offset: int, sort_key: str | None=None):

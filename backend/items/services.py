@@ -1,10 +1,10 @@
-from sqlalchemy import create_engine, MetaData, Table, select, func, insert, update
+from sqlalchemy import create_engine, MetaData, Table, select, func, insert, update, delete
 from sqlalchemy.dialects.postgresql import TSVECTOR
 import os
 from dotenv import load_dotenv
 from pathlib import Path
 from filterModel import FilterModel
-from fastapi import FastAPI, HTTPException, status, Depends
+from fastapi import FastAPI, HTTPException, status, Depends, Request
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 import uuid
 import bcrypt
@@ -22,6 +22,7 @@ class ItemHandler():
         self.sites = Table("sites", self.meta_data, autoload_with=self.engine)
         self.item_change_records = Table("item_change_records", self.meta_data, autoload_with=self.engine)
         self.users = Table("users", self.meta_data, autoload_with=self.engine)
+        self.sessions = Table("sessions", self.meta_data, autoload_with=self.engine)
 
     def init_connection(self):
         self.load_env()
@@ -180,24 +181,89 @@ class ItemHandler():
             hash = hash.decode()
 
             session_token = self.create_new_user(email,hash)
+
             return session_token
-        
-    def authenticate_user(self, credentials:HTTPBasicCredentials=Depends(security)):
+
+    def log_user_in(self, credentials:HTTPBasicCredentials=Depends(security)):
         query = select(
+            self.users.c.id,
             self.users.c.email,
             self.users.c.password,
-            self.users.c.session_token,
-            self.users.c.session_end
+        ).where(self.users.c.email == credentials.username)
+
+        results = self.connection.execute(query)
+        
+        num_results = 0
+        for row in results:
+            num_results += 1
+
+            user_id = row.id
+            db_password = row.password 
+
+        if num_results == 0:
+            raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="There is no account associated with this email",
+                    headers={"WWW-Authenticate" : "Basic"}
+            )
+    
+        cred_encoded_pwd = credentials.password.encode()
+        db_encoded_pwd = db_password.encode()
+
+        do_passwords_match = bcrypt.checkpw(cred_encoded_pwd, db_encoded_pwd)
+
+        if not do_passwords_match:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid password"
+            )
+        
+        new_session_token, new_session_start, new_session_end = self.generate_session_token_info()
+
+        #need to check if users sessions already exist 
+        #for some reason or just log user out of everywhere
+        duplicate_session_query = select(self.sessions.c.user_id).where(self.sessions.c.user_id == user_id)
+        results = self.connection.execute(duplicate_session_query)
+        
+        count = 0
+        for _ in results:
+            count += 1
+        
+        if count > 0:
+            session_delete_query = delete(self.sessions).where(self.sessions.c.user_id == user_id)
+            self.connection.execute(session_delete_query)
+            self.connection.commit()
+
+        insert_session_query = (
+            insert(self.sessions) \
+            .values(session_token=new_session_token, user_id=user_id, 
+                    session_start=new_session_start, session_end=new_session_end)
+        )
+
+        self.connection.execute(insert_session_query)
+        self.connection.commit()
+
+        return new_session_token
+        
+    def authenticate_user(self, credentials:HTTPBasicCredentials=Depends(security)):
+        #the responsability of authenticate user is to act as an injected dependency.
+        #When a user wants to access a "protected" endpoint, this will authenticate their session id
+
+        query = select(
+            self.users.c.id,
+            self.users.c.email,
+            self.users.c.password,
+            # self.sessions.c.session_token,
+            # self.sessions.c.session_end
         ).where(self.users.c.email == credentials.username)
 
         results = self.connection.execute(query)
 
         results_len = 0
         for row in results:
+            user_id = row.id
             pwd_in_db = row.password
-            session_token = row.session_token
-            session_end = row.session_end
-
+           
             results_len += 1
 
         print(f'results_len: {results_len}')
@@ -222,12 +288,24 @@ class ItemHandler():
                 detail="Invalid password"
             )
         
+        session_info_query = select(
+            self.session.c.session_token,
+            self.session.c.session_end
+        ).where(self.session.c.user_id == user_id)
+
+        results = self.connection.execute(session_info_query)
+
+        for row in results:
+            session_token = row.session_token
+            session_end = row.session_end
+
+        
         current_time = datetime.datetime.now()
         if session_end <= current_time:
             new_session_token, new_session_start, new_session_end = self.generate_session_token_info()
 
-            update_session_query = update(self.users) \
-                .where(self.users.c.email == credentials.username) \
+            update_session_query = update(self.sessions) \
+                .where(self.users.c.id == self.sessions.c.user_id) \
                 .values(
                     session_token=new_session_token,
                     session_start=new_session_start,
@@ -240,6 +318,17 @@ class ItemHandler():
             return new_session_token
     
         return session_token
+    
+    def log_user_out(self, request:Request):
+        session_token = request.cookies.get("session_token")
+        query = delete(self.sessions).where(self.sessions.c.session_token == session_token)
+
+        self.connection.execute(query)
+        self.connection.commit()
+
+        return {"message:" : "User session deleted successfully"}
+    
+
 
     def create_new_user(self, email, hashed_password):
         session_token, session_start, session_end = self.generate_session_token_info()
@@ -255,6 +344,10 @@ class ItemHandler():
         print(str(insert_query.compile()))
         self.connection.execute(insert_query)
         self.connection.commit()
+
+        insert_query = (
+            insert(self.sessions).values(session_token=session_token, user_id=user_id, session_start=formatted_session_start, session_end=formatted_session_end)
+        )
 
         return session_token
     
