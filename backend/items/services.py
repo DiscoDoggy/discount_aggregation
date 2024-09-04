@@ -218,7 +218,6 @@ class ItemHandler():
                 detail="Invalid password"
             )
         
-        new_session_token, new_session_start, new_session_end = self.generate_session_token_info()
 
         #need to check if users sessions already exist 
         #for some reason or just log user out of everywhere
@@ -234,6 +233,8 @@ class ItemHandler():
             self.connection.execute(session_delete_query)
             self.connection.commit()
 
+        new_session_token, new_session_start, new_session_end = self.generate_session_token_info()
+
         insert_session_query = (
             insert(self.sessions) \
             .values(session_token=new_session_token, user_id=user_id, 
@@ -245,80 +246,39 @@ class ItemHandler():
 
         return new_session_token
         
-    def authenticate_user(self, credentials:HTTPBasicCredentials=Depends(security)):
+    def authenticate_user(self, request:Request):
         #the responsability of authenticate user is to act as an injected dependency.
         #When a user wants to access a "protected" endpoint, this will authenticate their session id
+        #passed in as a cookie
+        session_token = request.cookies.get("session_token")
 
-        query = select(
-            self.users.c.id,
-            self.users.c.email,
-            self.users.c.password,
-            # self.sessions.c.session_token,
-            # self.sessions.c.session_end
-        ).where(self.users.c.email == credentials.username)
+        session_token_query = select(
+            self.sessions.c.user_id,
+            self.sessions.c.session_token,
+            self.sessions.c.session_end
+        ).where(session_token == self.sessions.c.session_token)
 
-        results = self.connection.execute(query)
-
-        results_len = 0
-        for row in results:
-            user_id = row.id
-            pwd_in_db = row.password
-           
-            results_len += 1
-
-        print(f'results_len: {results_len}')
-
-        if results_len == 0:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="There is no account associated with this email",
-                headers={"WWW-Authenticate" : "Basic"}
-            )
-        
-        print(f'pwd_in_db: {pwd_in_db}')
-
-        cred_encoded_pwd = credentials.password.encode()
-        db_encoded_pwd = pwd_in_db.encode()
-
-        do_passwords_match = bcrypt.checkpw(cred_encoded_pwd, db_encoded_pwd)
-
-        if not do_passwords_match:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid password"
-            )
-        
-        session_info_query = select(
-            self.session.c.session_token,
-            self.session.c.session_end
-        ).where(self.session.c.user_id == user_id)
-
-        results = self.connection.execute(session_info_query)
+        results = self.connection.execute(session_token_query)
 
         for row in results:
+            user_id = row.user_id
             session_token = row.session_token
             session_end = row.session_end
 
-        
         current_time = datetime.datetime.now()
         if session_end <= current_time:
-            new_session_token, new_session_start, new_session_end = self.generate_session_token_info()
-
-            update_session_query = update(self.sessions) \
-                .where(self.users.c.id == self.sessions.c.user_id) \
-                .values(
-                    session_token=new_session_token,
-                    session_start=new_session_start,
-                    session_end=new_session_end
-                )
-            
-            self.connection.execute(update_session_query)
+            session_delete_query = delete(self.sessions).where(self.sessions.c.session_token == session_token)
+            self.connection.execute(session_delete_query)
             self.connection.commit()
 
-            return new_session_token
-    
-        return session_token
-    
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Session expired. Please login again."
+            )
+        
+        return {"Message": "Authentication success",
+                "user_id" : user_id}
+            
     def log_user_out(self, request:Request):
         session_token = request.cookies.get("session_token")
         query = delete(self.sessions).where(self.sessions.c.session_token == session_token)
@@ -328,8 +288,6 @@ class ItemHandler():
 
         return {"message:" : "User session deleted successfully"}
     
-
-
     def create_new_user(self, email, hashed_password):
         session_token, session_start, session_end = self.generate_session_token_info()
 
@@ -339,7 +297,7 @@ class ItemHandler():
         user_id = uuid.uuid4()
 
         insert_query = (
-            insert(self.users).values(id=user_id, email=email, password=hashed_password, session_token=session_token, session_start=formatted_session_start, session_end=formatted_session_end)
+            insert(self.users).values(id=user_id, email=email, password=hashed_password)
         )
         print(str(insert_query.compile()))
         self.connection.execute(insert_query)
@@ -348,6 +306,9 @@ class ItemHandler():
         insert_query = (
             insert(self.sessions).values(session_token=session_token, user_id=user_id, session_start=formatted_session_start, session_end=formatted_session_end)
         )
+
+        self.connection.execute(insert_query)
+        self.connection.commit()
 
         return session_token
     

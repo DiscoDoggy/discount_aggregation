@@ -42,6 +42,11 @@ def create_account(user_info: CreateUserModel, response:Response):
 def login(session_token : str = Depends(item_handler.log_user_in)):
     return {"session_id" : session_token}
 
+@app.post("/auth/saved_posts")
+def get_saved_posts(auth_data : dict = Depends(item_handler.authenticate_user)):
+    return auth_data
+                    
+
 @app.post("/user/logout")
 def logout(request:Request):
     item_handler.log_user_out(request)
